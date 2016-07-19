@@ -179,12 +179,7 @@ module.exports = angular.module('spinnaker.core.projects.configure.modal.control
 
     wizardSubFormValidation
       .config({ scope: $scope, form: 'projectConfigForm' })
-      .register({ subForm: 'clustersSubForm', page: 'clusters', validators: [
-        {
-          watchString: 'command.config.clusters.length',
-          validator: clusterCount => clusterCount > 0
-        }
-      ]})
+      .register({ subForm: 'clustersSubForm', page: 'clusters' })
       .register({ subForm: 'pipelinesSubForm', page: 'pipelines' })
       .register({ subForm: 'configSubForm', page: 'config' })
       .register({ subForm: 'applicationsSubForm', page: 'applications' });
