@@ -25,6 +25,10 @@ module.exports = angular.module('spinnaker.core.loadBalancer.serverGroup', [
           };
         }
 
+        scope.getRegion = () => {
+          return scope.serverGroup.region || scope.loadBalancer.region;
+        };
+
         setInstances();
 
         scope.$watch('sortFilter', setInstances, true);
