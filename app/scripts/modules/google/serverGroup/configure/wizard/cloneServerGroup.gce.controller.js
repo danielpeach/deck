@@ -22,6 +22,7 @@ module.exports = angular.module('spinnaker.serverGroup.configure.gce.cloneServer
       securityGroups: require('./securityGroups/securityGroups.html'),
       instanceType: require('./instanceType/instanceType.html'),
       capacity: require('./capacity/capacity.html'),
+      autoscalingPolicy: require('./autoscalingPolicy/autoscalingPolicy.html'),
       zones: require('./capacity/zones.html'),
       advancedSettings: require('./advancedSettings/advancedSettings.html'),
     };
