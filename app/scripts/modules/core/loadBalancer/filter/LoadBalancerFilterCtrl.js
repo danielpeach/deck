@@ -18,7 +18,12 @@ module.exports = angular.module('spinnaker.core.loadBalancer.filter.controller',
 
     var ctrl = this;
 
+    function dependentFilterPoolBuilder (loadBalancers) {
+      debugger;
+    }
+
     this.updateLoadBalancerGroups = () => {
+      dependentFilterPoolBuilder(app.loadBalancers.data);
       let { availabilityZone, region, account } = dependentFilterService.digestDependentFilters({
         sortFilter: LoadBalancerFilterModel.sortFilter,
         dependencies: [

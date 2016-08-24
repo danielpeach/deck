@@ -19,19 +19,52 @@ module.exports = angular.module('cluster', [
 
     var ctrl = this;
 
+    function dependentFilterPoolBuilder (serverGroups) {
+      let fieldsOfInterest = [
+        { filterField: 'providerType', on: 'serverGroup', localField: 'type' },
+        { filterField: 'account', on: 'serverGroup', localField: 'account' },
+        { filterField: 'region', on: 'serverGroup', localField: 'region' },
+        { filterField: 'availabilityZone', on: 'instance', localField: 'availabilityZone' },
+        { filterField: 'instanceType', on: 'serverGroup', localField: 'instanceType' }
+      ];
+
+      let pool = _(serverGroups)
+        .map((sg) => {
+          let poolUnitTemplate = fieldsOfInterest.reduce((poolUnitTemplate, field) => {
+            if (field.on === 'serverGroup') {
+              poolUnitTemplate[field.filterField] = sg[field.localField];
+            }
+            return poolUnitTemplate;
+          }, {});
+
+          return sg.instances.map((i) => {
+            let poolUnit = _.cloneDeep(poolUnitTemplate);
+            return fieldsOfInterest.reduce((poolUnit, field) => {
+              if (field.on === 'instance') {
+                poolUnit[field.filterField] = i[field.localField];
+              }
+              return poolUnit;
+            }, poolUnit);
+          });
+        })
+        .flatten()
+        .valueOf();
+
+      return pool;
+    }
+
     this.updateClusterGroups = () => {
-      let { account, availabilityZone, region } = dependentFilterService.digestDependentFilters({
+      let { providerType, instanceType, account, availabilityZone, region } = dependentFilterService.digestDependentFilters({
         sortFilter: ClusterFilterModel.sortFilter,
-        dependencies: [
-          { child: 'account', parent: 'providerType', childKeyedByParent: ctrl.accountsKeyedByProvider },
-          { child: 'region', parent: 'account', childKeyedByParent: ctrl.regionsKeyedByAccount },
-          { child: 'availabilityZone', parent: 'region', childKeyedByParent: ctrl.availabilityZonesKeyedByRegion }
-        ]
+        dependencyOrder: ['providerType', 'account', 'region', 'availabilityZone', 'instanceType'],
+        pool: dependentFilterPoolBuilder(app.serverGroups.data)
       });
 
+      ctrl.providerTypeHeadings = providerType;
       ctrl.accountHeadings = account;
       ctrl.availabilityZoneHeadings = availabilityZone;
       ctrl.regionHeadings = region;
+      ctrl.instanceTypeHeadings = instanceType;
 
       ClusterFilterModel.applyParamsToUrl();
       clusterFilterService.updateClusterGroups(app);
@@ -47,32 +80,7 @@ module.exports = angular.module('cluster', [
       ctrl.updateClusterGroups();
     }
 
-    function getAvailabilityZonesKeyedByRegion() {
-      return _(app.serverGroups.data)
-        .groupBy('region')
-        .mapValues((serverGroups) => _(serverGroups)
-          .pluck('instances')
-          .flatten()
-          .pluck('availabilityZone')
-          .uniq()
-          .valueOf())
-        .valueOf();
-    }
-
-    function getAKeyedByB(a,b) {
-      return _(app.serverGroups.data)
-        .groupBy(b)
-        .mapValues((serverGroups) => _(serverGroups)
-          .pluck(a).flatten().uniq().valueOf())
-        .valueOf();
-    }
-
     this.initialize = function() {
-      ctrl.providerTypeHeadings = getHeadingsForOption('type');
-      ctrl.accountsKeyedByProvider = getAKeyedByB('account', 'type');
-      ctrl.regionsKeyedByAccount = getAKeyedByB('region', 'account');
-      ctrl.availabilityZonesKeyedByRegion = getAvailabilityZonesKeyedByRegion();
-      ctrl.instanceTypeHeadings = getHeadingsForOption('instanceType');
       ctrl.stackHeadings = ['(none)'].concat(getHeadingsForOption('stack'));
       ctrl.categoryHeadings = getHeadingsForOption('category');
       ctrl.clearFilters = clearFilters;

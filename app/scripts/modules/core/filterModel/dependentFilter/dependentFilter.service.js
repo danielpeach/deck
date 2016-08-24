@@ -7,57 +7,58 @@ module.exports = angular.module('spinnaker.deck.core.filterModel.dependentFilter
 ])
   .factory('dependentFilterService', function (_) {
 
-    // Dependencies must be ordered from top-level parent to bottom-level child and cannot branch.
-    function digestDependentFilters({ dependencies, sortFilter }) {
-      let headings = dependencies.reduce(generateIterator(sortFilter), {});
-      handleTail(_.last(dependencies).child, sortFilter, headings);
-
+    function digestDependentFilters ({ pool, dependencyOrder, sortFilter }) {
+      let headings = dependencyOrder.reduce(generateIterator(sortFilter), { pool, headings: {} }).headings;
       return headings;
     }
 
-    function generateIterator(sortFilter) {
-      return function iterator(headings, { child, parent, childKeyedByParent }) {
-        let staleSelectedParents = mapTruthyHashKeysToList(sortFilter[parent]);
-        // headings[parent] will be undefined for head of chain, but all headings are available.
-        let availableParents = headings[parent] || mapTruthyHashKeysToList(childKeyedByParent);
-
-        unselectDifference(staleSelectedParents, availableParents, sortFilter[parent]);
-        let selectedParents = mapTruthyHashKeysToList(sortFilter[parent]);
-
-        let parents = getParents(availableParents, selectedParents);
-        headings[child] = getChildHeadings(parents, childKeyedByParent);
-
-        return headings;
+    function generateIterator (sortFilter) {
+      return function iterator (acc, field) {
+        let { headings, pool } = acc;
+        headings[field] = grabHeadingsForField(pool, field);
+        unselectUnavailableHeadings(headings[field], sortFilter[field]);
+        acc.pool = filterPoolBySelectedField(pool, field, sortFilter);
+        return acc;
       };
     }
 
-    function handleTail(lastChild, sortFilter, headings) {
-      let selectedLastChildren = mapTruthyHashKeysToList(sortFilter[lastChild]);
-      unselectDifference(selectedLastChildren, headings[lastChild], sortFilter[lastChild]);
+    function grabHeadingsForField (pool, field) {
+      return _(pool).pluck(field).uniq().compact().valueOf();
     }
 
-    function getParents(availableParents, selectedParents) {
-      if (selectedParents.length) {
-        return _.intersection(availableParents, selectedParents);
+    function filterPoolBySelectedField (pool, field, sortFilter) {
+      let selected = sortFilter[field];
+      if (!mapTruthyHashKeysToList(selected).length) {
+        return pool;
       }
-      return availableParents;
+
+      return pool.filter(unit => selected[unit[field]]);
     }
 
-    function getChildHeadings(parents, childKeyedByParent) {
-      return _(parents)
-        .map(parent => childKeyedByParent[parent])
-        .flatten()
-        .uniq()
-        .valueOf();
+    function unselectUnavailableHeadings (headings, selected) {
+      if (!selected) {
+        return;
+      }
+
+      let headingSet = setBuilder(headings);
+      Object.keys(selected).forEach(key => {
+        if (!headingSet[key]) {
+          delete selected[key];
+        }
+      });
     }
 
-    function mapTruthyHashKeysToList(hash) {
+    function setBuilder (array) {
+      return array.reduce((s, el) => {
+        if (!(el in s)) {
+          s[el] = true;
+        }
+        return s;
+      }, {});
+    }
+
+    function mapTruthyHashKeysToList (hash) {
       return Object.keys(_.pick(hash, _.identity));
-    }
-
-    function unselectDifference(selected, available, selectedHash) {
-      _.difference(selected, available)
-        .forEach(toUnselect => delete selectedHash[toUnselect]);
     }
 
     return { digestDependentFilters };
