@@ -19,19 +19,48 @@ module.exports = angular.module('spinnaker.core.loadBalancer.filter.controller',
     var ctrl = this;
 
     function dependentFilterPoolBuilder (loadBalancers) {
-      debugger;
+      let fieldsOfInterest = [
+        { filterField: 'account', on: 'loadBalancer', localField: 'account' },
+        { filterField: 'region', on: 'loadBalancer', localField: 'region' },
+        { filterField: 'availabilityZone', on: 'instance', localField: 'zone' }
+      ];
+
+      let pool = _(loadBalancers)
+        .map((lb) => {
+          let poolUnitTemplate = fieldsOfInterest.reduce((poolUnitTemplate, field) => {
+            if (field.on === 'loadBalancer') {
+              poolUnitTemplate[field.filterField] = lb[field.localField];
+            }
+            return poolUnitTemplate;
+          }, {});
+
+          return _(['instances', 'detachedInstances'])
+            .map((instanceStatus) => lb[instanceStatus])
+            .flatten()
+            .map((i) => {
+              let poolUnit = _.cloneDeep(poolUnitTemplate)
+              return fieldsOfInterest.reduce((poolUnit, field) => {
+                if (field.on === 'instance') {
+                  poolUnit[field.filterField] = i[field.localField];
+                }
+                return poolUnit;
+              }, poolUnit);
+            })
+            .valueOf();
+        })
+        .flatten()
+        .valueOf();
+
+      return pool;
     }
 
     this.updateLoadBalancerGroups = () => {
-      dependentFilterPoolBuilder(app.loadBalancers.data);
       let { availabilityZone, region, account } = dependentFilterService.digestDependentFilters({
         sortFilter: LoadBalancerFilterModel.sortFilter,
-        dependencies: [
-          { child: 'account', parent: 'providerType', childKeyedByParent: ctrl.accountsKeyedByProvider },
-          { child: 'region', parent: 'account', childKeyedByParent: ctrl.regionsKeyedByAccount },
-          { child: 'availabilityZone', parent: 'region', childKeyedByParent: ctrl.availabilityZonesKeyedByRegion }
-        ]
+        dependencyOrder: ['account', 'region', 'availabilityZone'],
+        pool: dependentFilterPoolBuilder(app.loadBalancers.data)
       });
+      debugger;
       ctrl.accountHeadings = account;
       ctrl.regionHeadings = region;
       ctrl.availabilityZoneHeadings = availabilityZone;
@@ -50,37 +79,7 @@ module.exports = angular.module('spinnaker.core.loadBalancer.filter.controller',
       ctrl.updateLoadBalancerGroups();
     }
 
-    function getAKeyedByB(a, b) {
-      return _(app.loadBalancers.data)
-        .groupBy(b)
-        .mapValues((loadBalancers) => _(loadBalancers).pluck(a).uniq().valueOf())
-        .valueOf();
-    }
-
-    function getAvailabilityZonesKeyedByRegion() {
-      return _(app.loadBalancers.data)
-        .groupBy('region')
-        .mapValues((loadBalancers) => {
-          return _([ 'instances', 'detachedInstances' ])
-            .map((instanceStatus) => {
-              return _(loadBalancers)
-                .pluck(instanceStatus)
-                .flatten()
-                .pluck('zone')
-                .compact()
-                .uniq()
-                .valueOf();
-            })
-            .flatten()
-            .valueOf();
-        })
-        .valueOf();
-    }
-
     this.initialize = function() {
-      ctrl.accountsKeyedByProvider = getAKeyedByB('account', 'type');
-      ctrl.regionsKeyedByAccount = getAKeyedByB('region', 'account');
-      ctrl.availabilityZonesKeyedByRegion = getAvailabilityZonesKeyedByRegion();
       ctrl.stackHeadings = ['(none)'].concat(getHeadingsForOption('stack'));
       ctrl.providerTypeHeadings = getHeadingsForOption('type');
       ctrl.clearFilters = clearFilters;
