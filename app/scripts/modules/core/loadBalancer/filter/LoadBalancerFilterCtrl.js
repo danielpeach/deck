@@ -46,7 +46,8 @@ module.exports = angular.module('spinnaker.core.loadBalancer.filter.controller',
                 return poolUnit;
               }, poolUnit);
             })
-            .valueOf();
+            .valueOf()
+            .concat(poolUnitTemplate);
         })
         .flatten()
         .valueOf();
