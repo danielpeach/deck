@@ -13,6 +13,7 @@ module.exports = angular.module('spinnaker.kubernetes.namespace.selectField.dire
         field: '@',
         account: '=',
         onChange: '&',
+        hideLabel: '=',
       }
     };
   });

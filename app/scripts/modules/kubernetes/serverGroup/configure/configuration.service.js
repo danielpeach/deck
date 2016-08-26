@@ -17,7 +17,9 @@ module.exports = angular.module('spinnaker.serverGroup.configure.kubernetes.conf
       let queries = command.containers
         .map(c => formatQuery(grabImageAndTag(c.imageDescription.imageId)));
 
-      queries.push(formatQuery(query));
+      if (query) {
+        queries.push(formatQuery(query));
+      }
 
       let imagesPromise = $q.all(queries
         .map(q => kubernetesImageReader.findImages({

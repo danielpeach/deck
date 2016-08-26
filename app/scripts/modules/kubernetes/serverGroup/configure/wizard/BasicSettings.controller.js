@@ -16,11 +16,6 @@ module.exports = angular.module('spinnaker.serverGroup.configure.kubernetes.basi
                                                                        kubernetesServerGroupConfigurationService) {
 
     function searchImages(q) {
-      $scope.command.backingData.filtered.images = [
-        {
-          message: '<span class="glyphicon glyphicon-spinning glyphicon-asterisk"></span> Finding results matching "' + q + '"...'
-        }
-      ];
       return rx.Observable.fromPromise(
         kubernetesServerGroupConfigurationService
           .configureCommand($scope.application, $scope.command, q)
@@ -30,11 +25,18 @@ module.exports = angular.module('spinnaker.serverGroup.configure.kubernetes.basi
     var imageSearchResultsStream = new rx.Subject();
 
     imageSearchResultsStream
-      .throttle(250)
+      .debounce(250)
       .flatMapLatest(searchImages)
       .subscribe();
 
     this.searchImages = function(q) {
+      $scope.command.backingData.filtered.images = [
+        {
+          imageDescription: {
+            imageId: '<span class="glyphicon glyphicon-spinning glyphicon-asterisk"></span> Finding results matching "' + q + '"...'
+          }
+        }
+      ];
       imageSearchResultsStream.onNext(q);
     };
 
