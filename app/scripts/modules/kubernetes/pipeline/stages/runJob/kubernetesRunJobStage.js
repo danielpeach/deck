@@ -4,6 +4,7 @@ let angular = require('angular');
 
 module.exports = angular.module('spinnaker.core.pipeline.stage.kubernetes.runJobStage', [
   require('../../../../core/pipeline/config/stages/stageConstants.js'),
+  require('../../../../core/utils/lodash.js'),
   require('../../../../docker/image/dockerImageAndTagSelector.component.js'),
   require('../../../container/commands.component.js'),
   require('../../../container/arguments.component.js'),
@@ -18,9 +19,11 @@ module.exports = angular.module('spinnaker.core.pipeline.stage.kubernetes.runJob
       executionDetailsUrl: require('./runJobExecutionDetails.html'),
       executionStepLabelUrl: require('./runJobStepLabel.html'),
     });
-  }).controller('kubernetesRunJobStageCtrl', function($scope, accountService) {
+  }).controller('kubernetesRunJobStageCtrl', function($scope, accountService, _) {
     this.stage = $scope.stage;
-    this.stage.container.name = Date.now().toString();
+    if (!_.get(this.stage, 'container.name')) {
+      _.set(this.stage, 'container.name', Date.now().toString());
+    }
 
     accountService.getUniqueAttributeForAllAccounts('namespaces')('kubernetes')
       .then((namespaces) => {
