@@ -100,7 +100,7 @@
         </dd>
       </dl>
       <dl ng-if="loadBalancer.service.status.loadBalancer.ingress.length">
-        <dt>Ingress IPs</dt>a
+        <dt>Ingress IPs</dt>
         <dd ng-repeat="ingress in loadBalancer.service.status.loadBalancer.ingress">
           <a target="_blank" href="//{{ingress.ip}}">
             {{ingress.ip}}
