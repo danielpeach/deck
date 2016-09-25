@@ -1,8 +1,10 @@
 'use strict';
 
+import backendServiceReader from '../backendService/backendService.reader.ts';
 let angular = require('angular');
 
 module.exports = angular.module('spinnaker.gce.cache.initializer', [
+  backendServiceReader,
   require('../../core/account/account.service.js'),
   require('../../core/instance/instanceTypeService.js'),
   require('../../core/loadBalancer/loadBalancer.read.service.js'),
@@ -11,11 +13,16 @@ module.exports = angular.module('spinnaker.gce.cache.initializer', [
   require('../../core/subnet/subnet.read.service.js'),
   require('../httpHealthCheck/httpHealthCheck.reader.js'),
 ])
-  .factory('gceCacheConfigurer', function (accountService, gceCertificateReader,
-                                           gceHttpHealthCheckReader, instanceTypeService,
-                                           loadBalancerReader, networkReader, subnetReader) {
+  .factory('gceCacheConfigurer', function (accountService, gceBackendServiceReader,
+                                           gceCertificateReader, gceHttpHealthCheckReader,
+                                           instanceTypeService, loadBalancerReader,
+                                           networkReader, subnetReader) {
 
     let config = Object.create(null);
+
+    config.backendServices = {
+      initializers: [ () => gceBackendServiceReader.listBackendServices() ],
+    };
 
     config.certificates = {
       initializers: [ () => gceCertificateReader.listCertificates() ],
