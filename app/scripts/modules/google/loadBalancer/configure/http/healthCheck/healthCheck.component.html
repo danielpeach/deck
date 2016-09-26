@@ -2,15 +2,52 @@
 <ng-form name="healthCheck">
   <div class="container-fluid form-horizontal">
     <div class="form-group">
+      <div class="col-md-12 well"
+           ng-if="$ctrl.healthCheck.name"
+           ng-class="$ctrl.useExisting ? 'alert-warning' : 'alert-info'">
+        <strong ng-if="$ctrl.useExisting">You are editing the health check:</strong>
+        <strong ng-if="!$ctrl.useExisting">Your health check will be named:</strong>
+        <span>{{ $ctrl.healthCheck.name }}</span>
+      </div>
+    </div>
+    <div class="form-group">
       <div class="col-md-4 sm-label-right">Name</div>
-      <div class="col-md-3">
+
+      <div class="col-md-3" ng-if="$ctrl.useExisting">
+        <ui-select
+          ng-model="$ctrl.healthCheck"
+          on-select="$ctrl.onHealthCheckSelect($item)"
+          class="form-control input-sm">
+          <ui-select-match placeholder="Select...">
+            {{$select.selected.name}}
+          </ui-select-match>
+          <ui-select-choices repeat="healthCheck in $ctrl.backingData.healthChecks | filter: {name: $select.search}">
+            <div ng-bind-html="healthCheck.name | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+      </div>
+
+      <div class="col-md-3" ng-if="!$ctrl.useExisting">
         <input class="form-control input-sm"
                type="text"
                ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/"
                name="healthCheckName"
                max="63"
-               required ng-model="$ctrl.healthCheck.name"/>
+               ng-change="$ctrl.onHealthCheckNameChange($ctrl.healthCheck.name)"
+               required
+               ng-model="$ctrl.healthCheck.name"/>
       </div>
+
+      <div class="col-md-3">
+        <label class="sm-label-right">Use existing
+          <help-field ng-if="$ctrl.useExisting"
+                      key="gce.httpLoadBalancer.healthCheck.useExisting"></help-field>
+        </label>
+        <input type="checkbox"
+               ng-change="$ctrl.onUseExistingChange($ctrl.useExisting)"
+               ng-model="$ctrl.useExisting"/>
+      </div>
+
       <div class="col-md-1">
         <button class="btn btn-sm btn-default" ng-click="$ctrl.deleteHealthCheck()">
           <span class="glyphicon glyphicon-trash visible-lg-inline"></span>

@@ -7,7 +7,7 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.editStateUt
   ])
   .factory('gceHttpLoadBalancerEditStateUtils', function (_) {
 
-    function getBackingData (lb) {
+    function getRenderedData (lb) {
       let backendServices = getBackendServices(lb);
       let healthChecks = getHealthChecks(backendServices);
       let hostRules = getHostRules(lb);
@@ -99,5 +99,5 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.editStateUt
       delete lb.instances;
     }
 
-    return { getBackingData };
+    return { getRenderedData };
   });

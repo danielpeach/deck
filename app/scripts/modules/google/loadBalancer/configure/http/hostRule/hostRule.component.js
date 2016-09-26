@@ -10,7 +10,8 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.hostRule.co
     bindings: {
       hostRule: '=',
       index: '=',
-      backendServices: '=',
+      backingData: '=',
+      renderedData: '=',
       deleteHostRule: '&'
     },
     templateUrl: require('./hostRule.component.html'),
@@ -24,9 +25,9 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.hostRule.co
 
       this.isNameDefined = (backendService) => angular.isDefined(backendService.name);
 
-      this.oneBackendServiceIsConfigured = () => {
-        return this.backendServices.filter(this.isNameDefined).length > 0;
-      };
+      // this.oneBackendServiceIsConfigured = () => {
+      //   return this.backendServices.filter(this.isNameDefined).length > 0;
+      // };
 
       this.addPathRule = () => {
         pathRules.push(pathRuleTemplate());

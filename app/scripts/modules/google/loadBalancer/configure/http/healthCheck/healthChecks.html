@@ -1,6 +1,8 @@
 <ng-form name="healthChecks">
-  <gce-http-load-balancer-health-check ng-repeat="healthCheck in ctrl.backingData.healthChecks"
+  <gce-http-load-balancer-health-check ng-repeat="healthCheck in ctrl.renderedData.healthChecks"
                                        index="$index"
+                                       backing-data="ctrl.backingData"
+                                       rendered-data="ctrl.renderedData"
                                        delete-health-check="ctrl.remove('healthChecks', $index)"
                                        health-check="healthCheck"></gce-http-load-balancer-health-check>
   <div class="row">

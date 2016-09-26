@@ -3,9 +3,9 @@
 let angular = require('angular');
 
 module.exports = angular.module('spinnaker.deck.gce.certificateSelector.component', [
-    require('../../../../certificate/certificate.reader.js'),
-    require('../../../../../core/cache/cacheInitializer.js'),
-    require('../../../../../core/cache/infrastructureCaches.js'),
+    require('../../../certificate/certificate.reader.js'),
+    require('../../../../core/cache/cacheInitializer.js'),
+    require('../../../../core/cache/infrastructureCaches.js'),
   ])
   .component('gceCertificateSelector', {
     bindings : {

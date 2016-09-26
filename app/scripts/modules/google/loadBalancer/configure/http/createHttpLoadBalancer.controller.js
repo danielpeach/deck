@@ -9,20 +9,23 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
   require('./templateGenerator.service.js'),
   require('./backendService/backendService.component.js'),
   require('./healthCheck/healthCheck.component.js'),
-  require('./hostRule/hostRule.component.js'),
   require('./basicSettings/basicSettings.component.js'),
+  require('./hostRule/hostRule.component.js'),
   require('../../../../core/task/monitor/taskMonitorService.js'),
   require('../../httpLoadBalancer.write.service.js'),
   require('../../../../core/modal/wizard/wizardSubFormValidation.service.js'),
   require('./editStateUtils.service.js'),
   require('../../../../core/modal/wizard/v2modalWizard.service.js'),
   require('../../elSevenUtils.service.js'),
+  require('./backingData.service.js'),
+  require('./certificateSelector.component.js'),
 ])
   .controller('gceCreateHttpLoadBalancerCtrl', function (_, $scope, $uibModalInstance, application, taskMonitorService,
                                                          loadBalancer, isNew, loadBalancerWriter, taskExecutor,
                                                          gceHttpLoadBalancerWriter, $state, wizardSubFormValidation,
                                                          gceHttpLoadBalancerTemplateGenerator, $timeout, elSevenUtils,
-                                                         gceHttpLoadBalancerEditStateUtils) {
+                                                         gceHttpLoadBalancerEditStateUtils,
+                                                         gceHttpLoadBalancerBackingData) {
     let {
       backendServiceTemplate,
       healthCheckTemplate,
@@ -58,7 +61,7 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
         subForm: 'healthChecks',
         validators: [
           {
-            watchString: 'ctrl.backingData.healthChecks',
+            watchString: 'ctrl.renderedData.healthChecks',
             validator: (healthChecks) => healthChecks.length > 0,
             collection: true
           }
@@ -69,7 +72,7 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
         subForm: 'backendServices',
         validators: [
           {
-            watchString: 'ctrl.backingData.backendServices',
+            watchString: 'ctrl.renderedData.backendServices',
             validator: (services) => services.length > 0,
             collection: true
           }
@@ -79,7 +82,7 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
 
     this.loadBalancer = loadBalancer || httpLoadBalancerTemplate();
 
-    this.backingData = this.isNew
+    this.renderedData = this.isNew
       ? { backendServices: [
             (function () {
               let template = backendServiceTemplate();
@@ -88,24 +91,25 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
             })()],
           healthChecks: [healthCheckTemplate()],
           hostRules: [], }
-      : gceHttpLoadBalancerEditStateUtils.getBackingData(this.loadBalancer);
+      : gceHttpLoadBalancerEditStateUtils.getRenderedData(this.loadBalancer);
 
     this.add = (key) => {
-      this.backingData[key].push(keyToTemplateMap[key]());
+      debugger;
+      this.renderedData[key].push(keyToTemplateMap[key]());
     };
 
     this.remove = (key, index) => {
-      let [removed] = this.backingData[key].splice(index, 1);
+      let [removed] = this.renderedData[key].splice(index, 1);
 
       if (removed.useAsDefault) {
-        _.first(this.backingData[key]).useAsDefault = true;
+        _.first(this.renderedData[key]).useAsDefault = true;
       }
     };
 
     this.defaultServiceManager = (clickedService) => {
       // The checkbox operates more like a radio button: exactly one needs to be checked.
       if (clickedService.useAsDefault) {
-        this.backingData.backendServices
+        this.renderedData.backendServices
           .filter(service => service !== clickedService)
           .forEach(service => service.useAsDefault = false);
       } else {
@@ -149,8 +153,8 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
 
     this.submit = () => {
       let lb = this.loadBalancer;
-      lb.hostRules = this.backingData.hostRules;
-      lb.defaultService = this.backingData.backendServices.find(service => service.useAsDefault);
+      lb.hostRules = this.renderedData.hostRules;
+      lb.defaultService = this.renderedData.backendServices.find(service => service.useAsDefault);
       if (!lb.credentials) {
         lb.credentials = lb.account;
       }
@@ -167,6 +171,16 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
         this.loadBalancer.portRange = 443;
       }
     });
+
+    this.backingData = {
+      backendServices: [],
+      healthChecks: [],
+    };
+
+    gceHttpLoadBalancerBackingData.getBackingData()
+      .then((backingData) => {
+        this.backingData = backingData;
+      });
 
     this.cancel = $uibModalInstance.dismiss;
   });

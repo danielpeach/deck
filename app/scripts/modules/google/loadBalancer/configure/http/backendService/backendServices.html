@@ -1,8 +1,9 @@
 <ng-form name="backendServices">
-  <gce-backend-service ng-repeat="backendService in ctrl.backingData.backendServices"
+  <gce-backend-service ng-repeat="backendService in ctrl.renderedData.backendServices"
                        backend-service="backendService"
                        index="$index"
-                       health-checks="ctrl.backingData.healthChecks"
+                       backing-data="ctrl.backingData"
+                       rendered-data="ctrl.renderedData"
                        default-service-manager="ctrl.defaultServiceManager(backendService)"
                        delete-service="ctrl.remove('backendServices', $index)"></gce-backend-service>
   <div class="row">

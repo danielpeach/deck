@@ -1,10 +1,9 @@
 'use strict';
 
-import backendServiceReader from '../backendService/backendService.reader.ts';
 let angular = require('angular');
 
 module.exports = angular.module('spinnaker.gce.cache.initializer', [
-  backendServiceReader,
+  require('../backendService/backendService.reader.js'),
   require('../../core/account/account.service.js'),
   require('../../core/instance/instanceTypeService.js'),
   require('../../core/loadBalancer/loadBalancer.read.service.js'),

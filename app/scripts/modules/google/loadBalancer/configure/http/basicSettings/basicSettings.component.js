@@ -3,7 +3,6 @@
 let angular = require('angular');
 
 module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.basicSettings.component', [
-    require('./certificateSelector.component.js'),
     require('../../../../../core/account/account.service.js'),
     require('../../../../../core/loadBalancer/loadBalancer.read.service.js'),
     require('../../../../../core/utils/lodash.js'),

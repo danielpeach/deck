@@ -30,13 +30,10 @@
     <div class="col-md-4 sm-label-right">
       <b>Default Service</b>
     </div>
-    <div class="col-md-3 small text-center" ng-if="!$ctrl.oneBackendServiceIsConfigured()">
-      Configure at least one backend service
-    </div>
-    <div class="col-md-3" ng-if="$ctrl.oneBackendServiceIsConfigured()">
+    <div class="col-md-3">
       <select class="form-control input-sm" required
               ng-model="$ctrl.hostRule.pathMatcher.defaultService"
-              ng-options="backendService.name for backendService in $ctrl.backendServices | filter:$ctrl.isNameDefined">
+              ng-options="backendService.name for backendService in $ctrl.renderedData.backendServices.concat($ctrl.backingData.backendServices) | filter:$ctrl.isNameDefined">
       </select>
     </div>
   </div>

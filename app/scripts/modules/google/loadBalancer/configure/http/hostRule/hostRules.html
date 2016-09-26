@@ -1,8 +1,9 @@
 <ng-form name="hostRules">
-  <gce-host-rule ng-repeat="hostRule in ctrl.backingData.hostRules"
+  <gce-host-rule ng-repeat="hostRule in ctrl.renderedData.hostRules"
                  host-rule="hostRule"
                  index="$index"
-                 backend-services="ctrl.backingData.backendServices"
+                 backing-data="ctrl.backingData"
+                 rendered-data="ctrl.renderedData"
                  delete-host-rule="ctrl.remove('hostRules', $index)"></gce-host-rule>
   <div class="row">
     <div class="col-md-12">
