@@ -95,7 +95,6 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.editStateUt
     }
 
     function normalizeLoadBalancer (lb) {
-      lb.portRange = lb.portRange.split('-').pop();
       delete lb.instances;
     }
 

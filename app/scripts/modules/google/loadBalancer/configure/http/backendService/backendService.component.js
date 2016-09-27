@@ -4,7 +4,6 @@ let angular = require('angular');
 require('./../backendService.component.less');
 
 module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backendService.component', [
-    require('../backingData.service.js'),
     require('../../../../../core/utils/lodash.js'),
   ])
   .component('gceBackendService', {
@@ -17,7 +16,7 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backendServ
       defaultServiceManager: '&'
     },
     templateUrl: require('./backendService.component.html'),
-    controller: function (_, gceHttpLoadBalancerBackingData) {
+    controller: function (_) {
       this.onBackendServiceSelect = (backendService) => {
         _.assign(this.renderedData.backendServices[this.index], backendService);
 
@@ -27,25 +26,23 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backendServ
       };
 
       this.onBackendServiceNameChange = (backendServiceName) => {
-        if (_.has(this.backingData, ['backendServicesKeyedByName', backendServiceName])) {
-          this.useExisting = true;
+        if (this.backingData.backendServicesKeyedByName[backendServiceName]) {
+          this.editExisting = true;
           _.assign(
             this.renderedData.backendServices[this.index],
             this.backingData.backendServicesKeyedByName[backendServiceName]);
         }
       };
 
-      this.onUseExistingChange = (useExisting) => {
-        if (!useExisting) {
+      this.onEditExistingChange = (editExisting) => {
+        if (!editExisting) {
           delete this.backendService.name;
         }
       };
 
-      gceHttpLoadBalancerBackingData.onLoad(({ backendServicesKeyedByName }) => {
-        if (backendServicesKeyedByName[this.backendService.name]) {
-          this.useExisting = true;
-        }
-      });
+      if (this.backingData.backendServicesKeyedByName[this.backendService.name]) {
+        this.editExisting = true;
+      }
 
       this.isNameDefined = (healthCheck) => angular.isDefined(healthCheck.name);
 

@@ -17,15 +17,14 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
   require('./editStateUtils.service.js'),
   require('../../../../core/modal/wizard/v2modalWizard.service.js'),
   require('../../elSevenUtils.service.js'),
-  require('./backingData.service.js'),
+  require('./httpLoadBalancerCommandBuilder.service.js'),
   require('./certificateSelector.component.js'),
 ])
   .controller('gceCreateHttpLoadBalancerCtrl', function (_, $scope, $uibModalInstance, application, taskMonitorService,
                                                          loadBalancer, isNew, loadBalancerWriter, taskExecutor,
                                                          gceHttpLoadBalancerWriter, $state, wizardSubFormValidation,
                                                          gceHttpLoadBalancerTemplateGenerator, $timeout, elSevenUtils,
-                                                         gceHttpLoadBalancerEditStateUtils,
-                                                         gceHttpLoadBalancerBackingData) {
+                                                         gceHttpLoadBalancerCommandBuilder) {
     let {
       backendServiceTemplate,
       healthCheckTemplate,
@@ -52,49 +51,9 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
       'hostRules': require('./hostRule/hostRules.html'),
     };
 
-    wizardSubFormValidation
-      .config({scope: $scope, form: 'form'})
-      .register({page: 'location', subForm: 'location'})
-      .register({page: 'port', subForm: 'port'})
-      .register({
-        page: 'health-checks',
-        subForm: 'healthChecks',
-        validators: [
-          {
-            watchString: 'ctrl.renderedData.healthChecks',
-            validator: (healthChecks) => healthChecks.length > 0,
-            collection: true
-          }
-        ]
-      })
-      .register({
-        page: 'backend-services',
-        subForm: 'backendServices',
-        validators: [
-          {
-            watchString: 'ctrl.renderedData.backendServices',
-            validator: (services) => services.length > 0,
-            collection: true
-          }
-        ]
-      })
-      .register({page: 'host-rules', subForm: 'hostRules'});
-
     this.loadBalancer = loadBalancer || httpLoadBalancerTemplate();
 
-    this.renderedData = this.isNew
-      ? { backendServices: [
-            (function () {
-              let template = backendServiceTemplate();
-              template.useAsDefault = true;
-              return template;
-            })()],
-          healthChecks: [healthCheckTemplate()],
-          hostRules: [], }
-      : gceHttpLoadBalancerEditStateUtils.getRenderedData(this.loadBalancer);
-
     this.add = (key) => {
-      debugger;
       this.renderedData[key].push(keyToTemplateMap[key]());
     };
 
@@ -172,14 +131,38 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
       }
     });
 
-    this.backingData = {
-      backendServices: [],
-      healthChecks: [],
-    };
-
-    gceHttpLoadBalancerBackingData.getBackingData()
-      .then((backingData) => {
+    gceHttpLoadBalancerCommandBuilder.getData({ isNew, loadBalancer })
+      .then(({ backingData, renderedData }) => {
         this.backingData = backingData;
+        this.renderedData = renderedData;
+
+        wizardSubFormValidation
+          .config({scope: $scope, form: 'form'})
+          .register({page: 'location', subForm: 'location'})
+          .register({page: 'port', subForm: 'port'})
+          .register({
+            page: 'health-checks',
+            subForm: 'healthChecks',
+            validators: [
+              {
+                watchString: 'ctrl.renderedData.healthChecks',
+                validator: (healthChecks) => healthChecks.length > 0,
+                collection: true
+              }
+            ]
+          })
+          .register({
+            page: 'backend-services',
+            subForm: 'backendServices',
+            validators: [
+              {
+                watchString: 'ctrl.renderedData.backendServices',
+                validator: (services) => services.length > 0,
+                collection: true
+              }
+            ]
+          })
+          .register({page: 'host-rules', subForm: 'hostRules'});
       });
 
     this.cancel = $uibModalInstance.dismiss;

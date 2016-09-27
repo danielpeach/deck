@@ -3,7 +3,6 @@
 let angular = require('angular');
 
 module.exports = angular.module('spinnaker.deck.httpLoadBalancer.healthCheck.component', [
-    require('../backingData.service.js'),
     require('../../../../../core/utils/lodash.js'),
     require('../../../../../core/cache/cacheInitializer.js'),
     require('../../../../../core/cache/infrastructureCaches.js'),
@@ -17,7 +16,7 @@ module.exports = angular.module('spinnaker.deck.httpLoadBalancer.healthCheck.com
       renderedData: '=',
     },
     templateUrl: require('./healthCheck.component.html'),
-    controller: function (_, gceHttpLoadBalancerBackingData) {
+    controller: function (_) {
       this.max = Number.MAX_SAFE_INTEGER;
 
       this.onHealthCheckSelect = (healthCheck) => {
@@ -26,24 +25,21 @@ module.exports = angular.module('spinnaker.deck.httpLoadBalancer.healthCheck.com
 
       this.onHealthCheckNameChange = (healthCheckName) => {
         if (_.has(this.backingData, ['healthChecksKeyedByName', healthCheckName])) {
-          this.useExisting = true;
+          this.editExisting = true;
           _.assign(
             this.renderedData.healthChecks[this.index],
             this.backingData.healthChecksKeyedByName[healthCheckName]);
         }
       };
 
-      this.onUseExistingChange = (useExisting) => {
-        debugger;
-        if (!useExisting) {
+      this.onEditExistingChange = (editExisting) => {
+        if (!editExisting) {
           delete this.healthCheck.name;
         }
       };
 
-      gceHttpLoadBalancerBackingData.onLoad(({ healthChecksKeyedByName }) => {
-        if (healthChecksKeyedByName[this.healthCheck.name]) {
-          this.useExisting = true;
-        }
-      });
+      if (this.backingData.healthChecksKeyedByName[this.healthCheck.name]) {
+        this.editExisting = true;
+      }
     }
   });

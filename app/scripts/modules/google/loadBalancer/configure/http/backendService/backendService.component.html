@@ -4,20 +4,19 @@
     <div class="form-group">
       <div class="col-md-12 well"
            ng-if="$ctrl.backendService.name"
-           ng-class="$ctrl.useExisting ? 'alert-warning' : 'alert-info'">
-        <strong ng-if="$ctrl.useExisting">You are editing the backend service:</strong>
-        <strong ng-if="!$ctrl.useExisting">Your backend service will be named:</strong>
+           ng-class="$ctrl.editExisting ? 'alert-warning' : 'alert-info'">
+        <strong ng-if="$ctrl.editExisting">You are editing the backend service:</strong>
+        <strong ng-if="!$ctrl.editExisting">Your backend service will be named:</strong>
         <span>{{ $ctrl.backendService.name }}</span>
       </div>
     </div>
     <div class="form-group">
       <div class="col-md-4 sm-label-right">Name</div>
 
-      <div class="col-md-3" ng-if="$ctrl.useExisting">
-        <ui-select
-          ng-model="$ctrl.backendService"
-          on-select="$ctrl.onBackendServiceSelect($item)"
-          class="form-control input-sm">
+      <div class="col-md-3" ng-if="$ctrl.editExisting">
+        <ui-select ng-model="$ctrl.backendService"
+                   on-select="$ctrl.onBackendServiceSelect($item)"
+                   class="form-control input-sm">
           <ui-select-match placeholder="Select...">
             {{$select.selected.name}}
           </ui-select-match>
@@ -27,7 +26,7 @@
         </ui-select>
       </div>
 
-      <div class="col-md-3" ng-if="!$ctrl.useExisting">
+      <div class="col-md-3" ng-if="!$ctrl.editExisting">
         <input class="form-control input-sm"
                ng-change="$ctrl.onBackendServiceNameChange($ctrl.backendService.name)"
                required
@@ -39,13 +38,13 @@
       </div>
 
       <div class="col-md-3">
-        <label class="sm-label-right">Use existing
-          <help-field ng-if="$ctrl.useExisting"
-                      key="gce.httpLoadBalancer.backendService.useExisting"></help-field>
+        <label class="sm-label-right">Edit existing
+          <help-field ng-if="$ctrl.editExisting"
+                      key="gce.httpLoadBalancer.backendService.editExisting"></help-field>
         </label>
         <input type="checkbox"
-               ng-change="$ctrl.onEditExistingChange($ctrl.useExisting)"
-               ng-model="$ctrl.useExisting"/>
+               ng-change="$ctrl.onEditExistingChange($ctrl.editExisting)"
+               ng-model="$ctrl.editExisting"/>
       </div>
 
       <div class="col-md-1">
@@ -63,11 +62,16 @@
         Configure at least one health check
       </div>
       <div class="col-md-3" ng-if="$ctrl.oneHealthCheckIsConfigured()">
-        <select class="form-control input-sm"
-                required
-                ng-model="$ctrl.backendService.healthCheck"
-                ng-options="healthCheck.name for healthCheck in $ctrl.backingData.healthChecks.concat($ctrl.renderedData.healthChecks) | filter:$ctrl.isNameDefined">
-        </select>
+        <ui-select ng-model="$ctrl.backendService.healthCheck"
+                   class="form-control input-sm">
+          <ui-select-match placeholder="Select...">
+            {{$select.selected.name}}
+          </ui-select-match>
+          <ui-select-choices 
+            repeat="healthCheck in $ctrl.backingData.healthChecks.concat($ctrl.renderedData.healthChecks) | filter:$ctrl.isNameDefined">
+            <div ng-bind-html="healthCheck.name"></div>
+          </ui-select-choices>
+        </ui-select>
       </div>
       <div class="col-md-3">
         <label class="sm-label-right">Default service
