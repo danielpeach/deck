@@ -9,11 +9,17 @@
         <strong ng-if="!$ctrl.editExisting">Your health check will be named:</strong>
         <span>{{ $ctrl.healthCheck.name }}</span>
       </div>
+      <div class="col-md-12 well alert-danger"
+           ng-if="healthCheck.healthCheckName.$error.pattern || healthCheck.healthCheckName.$error.max">
+        <validation-error
+          message="Name must start with a lowercase letter followed by up to 62 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.">
+        </validation-error>
+      </div>
     </div>
     <div class="form-group">
       <div class="col-md-4 sm-label-right">Name</div>
 
-      <div class="col-md-3" ng-if="$ctrl.editExisting">
+      <div class="col-md-4" ng-if="$ctrl.editExisting">
         <ui-select
           ng-model="$ctrl.healthCheck"
           on-select="$ctrl.onHealthCheckSelect($item)"
@@ -27,7 +33,7 @@
         </ui-select>
       </div>
 
-      <div class="col-md-3" ng-if="!$ctrl.editExisting">
+      <div class="col-md-4" ng-if="!$ctrl.editExisting">
         <input class="form-control input-sm"
                type="text"
                ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/"
@@ -35,17 +41,8 @@
                max="63"
                ng-change="$ctrl.onHealthCheckNameChange($ctrl.healthCheck.name)"
                required
+               ng-model-options="{ debounce: 250 }"
                ng-model="$ctrl.healthCheck.name"/>
-      </div>
-
-      <div class="col-md-3">
-        <label class="sm-label-right">Edit existing
-          <help-field ng-if="$ctrl.editExisting"
-                      key="gce.httpLoadBalancer.healthCheck.editExisting"></help-field>
-        </label>
-        <input type="checkbox"
-               ng-change="$ctrl.onEditExistingChange($ctrl.editExisting)"
-               ng-model="$ctrl.editExisting"/>
       </div>
 
       <div class="col-md-1">
@@ -57,15 +54,28 @@
     </div>
 
     <div class="form-group">
+      <div class="col-md-6 col-md-offset-4">
+        <a href
+           class="small"
+           ng-if="!$ctrl.editExisting"
+           ng-click="$ctrl.toggleEditExisting()">Toggle for list of existing health checks</a>
+        <a href
+           class="small"
+           ng-if="$ctrl.editExisting"
+           ng-click="$ctrl.toggleEditExisting()">Toggle for text input</a>
+      </div>
+    </div>
+
+    <div class="form-group">
       <div class="col-md-4 sm-label-right">Request Path</div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <input class="form-control input-sm" required ng-model="$ctrl.healthCheck.requestPath"/>
       </div>
     </div>
 
     <div class="form-group">
       <div class="col-md-4 sm-label-right">Port</div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <input type="number"
                class="form-control input-sm"
                required
@@ -79,7 +89,7 @@
       <div class="col-md-4 sm-label-right">
         <b>Timeout</b><help-field key="loadBalancer.advancedSettings.healthTimeout"/>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <input class="form-control input-sm"
                type="number"
                min="0"
@@ -93,7 +103,7 @@
       <div class="col-md-4 sm-label-right">
         <b>Interval</b><help-field key="gce.loadBalancer.advancedSettings.healthInterval"/>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <input class="form-control input-sm"
                type="number"
                min="0"
@@ -107,7 +117,7 @@
       <div class="col-md-4 sm-label-right">
         <b>Healthy Threshold</b><help-field key="gce.loadBalancer.advancedSettings.healthyThreshold"/>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <input class="form-control input-sm"
                type="number"
                min="0"
@@ -121,21 +131,13 @@
       <div class="col-md-4 sm-label-right">
         <b>Unhealthy Threshold</b><help-field key="gce.loadBalancer.advancedSettings.unhealthyThreshold"/>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <input class="form-control input-sm"
                type="number"
                min="0"
                max="{{:: $ctrl.max}}"
                required
                ng-model="$ctrl.healthCheck.unhealthyThreshold"/>
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-md-10 col-md-offset-2"
-           ng-if="healthCheck.healthCheckName.$error.pattern || healthCheck.healthCheckName.$error.max">
-        <validation-error
-          message="Name must start with a lowercase letter followed by up to 62 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.">
-        </validation-error>
       </div>
     </div>
   </div>

@@ -54,11 +54,16 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.templateGen
       };
     }
 
+    function listenerTemplate () {
+      return {};
+    }
+
     return {
       backendServiceTemplate,
       healthCheckTemplate,
       hostRuleTemplate,
+      httpLoadBalancerTemplate,
+      listenerTemplate,
       pathRuleTemplate,
-      httpLoadBalancerTemplate
     };
   });

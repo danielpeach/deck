@@ -24,7 +24,7 @@ module.exports = angular.module('spinnaker.deck.httpLoadBalancer.healthCheck.com
       };
 
       this.onHealthCheckNameChange = (healthCheckName) => {
-        if (_.has(this.backingData, ['healthChecksKeyedByName', healthCheckName])) {
+        if (this.backingData.healthChecksKeyedByName[healthCheckName]) {
           this.editExisting = true;
           _.assign(
             this.renderedData.healthChecks[this.index],
@@ -32,8 +32,10 @@ module.exports = angular.module('spinnaker.deck.httpLoadBalancer.healthCheck.com
         }
       };
 
-      this.onEditExistingChange = (editExisting) => {
-        if (!editExisting) {
+      this.toggleEditExisting = () => {
+        this.editExisting = !this.editExisting;
+        if (!this.editExisting) {
+          _.assign(this.renderedData.healthChecks[this.index], this.healthCheck);
           delete this.healthCheck.name;
         }
       };

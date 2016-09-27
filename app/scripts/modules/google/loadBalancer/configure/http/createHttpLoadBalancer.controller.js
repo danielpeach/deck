@@ -1,6 +1,8 @@
 'use strict';
 
+import {HealthCheckTemplate, BackendServiceTemplate, HttpLoadBalancerTemplate, HostRuleTemplate} from './templates.ts';
 let angular = require('angular');
+require('./httpLoadBalancerWizard.component.less');
 
 module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.controller', [
   require('angular-ui-bootstrap'),
@@ -12,29 +14,24 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
   require('./basicSettings/basicSettings.component.js'),
   require('./hostRule/hostRule.component.js'),
   require('../../../../core/task/monitor/taskMonitorService.js'),
-  require('../../httpLoadBalancer.write.service.js'),
+  require('./httpLoadBalancer.write.service.js'),
   require('../../../../core/modal/wizard/wizardSubFormValidation.service.js'),
   require('./editStateUtils.service.js'),
   require('../../../../core/modal/wizard/v2modalWizard.service.js'),
   require('../../elSevenUtils.service.js'),
-  require('./httpLoadBalancerCommandBuilder.service.js'),
-  require('./certificateSelector.component.js'),
+  require('./deserialize.service.js'),
+  require('../../../cache/cacheRefresh.component.js'),
+  require('./listeners/listeners.component.js'),
 ])
-  .controller('gceCreateHttpLoadBalancerCtrl', function (_, $scope, $uibModalInstance, application, taskMonitorService,
+  .controller('gceCreateHttpLoadBalancerCtrl', function (_, $scope, settings, $uibModalInstance, application, taskMonitorService,
                                                          loadBalancer, isNew, loadBalancerWriter, taskExecutor,
                                                          gceHttpLoadBalancerWriter, $state, wizardSubFormValidation,
                                                          gceHttpLoadBalancerTemplateGenerator, $timeout, elSevenUtils,
-                                                         gceHttpLoadBalancerCommandBuilder) {
-    let {
-      backendServiceTemplate,
-      healthCheckTemplate,
-      hostRuleTemplate,
-      httpLoadBalancerTemplate } = gceHttpLoadBalancerTemplateGenerator;
-
+                                                         gceHttpDeserializeService) {
     let keyToTemplateMap = {
-      'backendServices': backendServiceTemplate,
-      'healthChecks': healthCheckTemplate,
-      'hostRules': hostRuleTemplate,
+      'backendServices': BackendServiceTemplate,
+      'healthChecks': HealthCheckTemplate,
+      'hostRules': HostRuleTemplate,
     };
 
     this.application = application;
@@ -45,16 +42,16 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
 
     this.pages = {
       'location': require('./basicSettings/basicSettings.html'),
-      'port': require('./port.html'),
+      'listeners': require('./listeners/listeners.html'),
       'backendServices': require('./backendService/backendServices.html'),
       'healthChecks': require('./healthCheck/healthChecks.html'),
       'hostRules': require('./hostRule/hostRules.html'),
     };
 
-    this.loadBalancer = loadBalancer || httpLoadBalancerTemplate();
+    this.loadBalancer = loadBalancer || new HttpLoadBalancerTemplate(_.get(settings, 'providers.gce.defaults.account') || null);
 
     this.add = (key) => {
-      this.renderedData[key].push(keyToTemplateMap[key]());
+      this.renderedData[key].push(new keyToTemplateMap[key]());
     };
 
     this.remove = (key, index) => {
@@ -123,23 +120,39 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
       this.taskMonitor.submit(() => gceHttpLoadBalancerWriter.upsertLoadBalancer(lb, application, descriptor));
     };
 
-    $scope.$watch('ctrl.loadBalancer.certificate', (cert) => {
-      if (!cert) {
-        this.loadBalancer.portRange = 8080;
-      } else {
-        this.loadBalancer.portRange = 443;
-      }
-    });
+    this.onHealthCheckRefresh = () => {
+      gceHttpDeserializeService.getHealthChecks()
+        .then((healthChecks) => {
+          this.backingData.healthChecks = healthChecks;
+        });
+    };
 
-    gceHttpLoadBalancerCommandBuilder.getData({ isNew, loadBalancer })
-      .then(({ backingData, renderedData }) => {
+    this.onBackendServiceRefresh = () => {
+      gceHttpDeserializeService.getBackendServices()
+        .then((backendServices) => {
+          gceHttpDeserializeService
+            .mapHealthCheckNamesToBackendServices(this.backingData.healthChecks, backendServices);
+          this.backingData.backendServices = backendServices;
+        });
+    };
+
+    this.onCertificateRefresh = () => {
+      gceHttpDeserializeService.getCertificates()
+        .then((certificates) => {
+          this.backingData.certificates = certificates;
+        });
+    };
+
+    gceHttpDeserializeService.getData({ isNew, loadBalancer })
+      .then(({ backingData, renderedData, aggregateData }) => {
         this.backingData = backingData;
         this.renderedData = renderedData;
+        this.aggregateData = aggregateData;
 
         wizardSubFormValidation
           .config({scope: $scope, form: 'form'})
           .register({page: 'location', subForm: 'location'})
-          .register({page: 'port', subForm: 'port'})
+          .register({page: 'listeners', subForm: 'listeners'})
           .register({
             page: 'health-checks',
             subForm: 'healthChecks',

@@ -11,8 +11,8 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.editStateUt
       let backendServices = getBackendServices(lb);
       let healthChecks = getHealthChecks(backendServices);
       let hostRules = getHostRules(lb);
+      let certificate = lb.certificate;
 
-      reconcileObjectReferences(lb, backendServices, healthChecks);
       normalizeLoadBalancer(lb);
 
       return { backendServices, healthChecks, hostRules };
@@ -29,9 +29,10 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.editStateUt
               return hostRule.pathMatcher.pathRules
                 .reduce((services, pathRule) => services.concat(pathRule.backendService), services);
             }, backendServices),
-          (service) => service.name);
+          'name');
       }
 
+      mapHealthChecksToNames(backendServices);
       return backendServices;
     }
 
@@ -44,7 +45,7 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.editStateUt
     function getHealthChecks (services) {
       return _(services)
         .map((s) => s.healthCheck)
-        .uniq((healthCheck) => healthCheck.name)
+        .uniq('name')
         .valueOf();
     }
 
@@ -52,51 +53,38 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.editStateUt
       return lb.hostRules;
     }
 
-    function reconcileObjectReferences (lb, backendServices, healthChecks) {
-      reconcileBackendServiceReferences(lb, backendServices);
-      reconcileHealthCheckReferences(backendServices, healthChecks);
-    }
-
-    function reconcileBackendServiceReferences (lb, backendServices) {
-      let servicesByName = _(backendServices)
-        .groupBy('name')
-        .mapValues((services) => _.first(services))
-        .valueOf();
-
+    function mapBackendServicesToNames (lb) {
       /*
-        places to spot a backend service:
-          1). loadBalancer.defaultService
-          2). hostRule.pathMatcher.defaultService
-          3). pathRule.backendService
-      */
+       places to spot a backend service:
+       1). loadBalancer.defaultService
+       2). hostRule.pathMatcher.defaultService
+       3). pathRule.backendService
+       */
 
-      lb.defaultService = servicesByName[lb.defaultService.name];
+      lb.defaultService = lb.defaultService.name;
 
       lb.hostRules.forEach((hostRule) => {
         let p = hostRule.pathMatcher;
 
-        p.defaultService = servicesByName[p.defaultService.name];
+        p.defaultService = p.defaultService.name;
 
         p.pathRules.forEach((pathRule) => {
-          pathRule.backendService = servicesByName[pathRule.backendService.name];
+          pathRule.backendService = pathRule.backendService.name;
         });
       });
     }
 
-    function reconcileHealthCheckReferences (backendServices, healthChecks) {
-      let healthChecksByName = _(healthChecks)
-        .groupBy('name')
-        .mapValues((checks) => _.first(checks))
-        .valueOf();
-
+    function mapHealthChecksToNames (backendServices) {
       backendServices.forEach((service) => {
-        service.healthCheck = healthChecksByName[service.healthCheck.name];
+        service.healthCheck = service.healthCheck.name;
       });
     }
 
     function normalizeLoadBalancer (lb) {
+      mapBackendServicesToNames(lb);
       delete lb.instances;
     }
 
     return { getRenderedData };
+
   });
