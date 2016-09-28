@@ -1,6 +1,6 @@
 'use strict';
 
-import {HealthCheckTemplate, BackendServiceTemplate, HostRuleTemplate} from './templates.ts';
+import {HealthCheckTemplate, BackendServiceTemplate, HostRuleTemplate, ListenerTemplate} from './templates.ts';
 let angular = require('angular');
 require('./httpLoadBalancerWizard.component.less');
 
@@ -20,16 +20,18 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
   require('../../elSevenUtils.service.js'),
   require('./commandBuilder.service.js'),
   require('../../../cache/cacheRefresh.component.js'),
-  require('./listeners/listeners.component.js'),
+  require('./listeners/listener.component.js'),
+  require('./transformer/transformer.service.js'),
 ])
   .controller('gceCreateHttpLoadBalancerCtrl', function (_, $scope, settings, $uibModalInstance, application, taskMonitorService,
                                                          loadBalancer, isNew, loadBalancerWriter, taskExecutor,
                                                          gceHttpLoadBalancerWriter, $state, wizardSubFormValidation,
-                                                         gceHttpLoadBalancerCommandBuilder) {
+                                                         gceHttpLoadBalancerCommandBuilder, gceHttpLoadBalancerTransformer) {
     let keyToTemplateMap = {
       'backendServices': BackendServiceTemplate,
       'healthChecks': HealthCheckTemplate,
       'hostRules': HostRuleTemplate,
+      'listeners': ListenerTemplate,
     };
 
     this.application = application;
@@ -48,13 +50,17 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
 
     this.add = (key) => {
       this.command.loadBalancer[key].push(new keyToTemplateMap[key]());
+
+      if (key === 'backendServices' && !this.command.loadBalancer.backendServices.find((s) => s.useAsDefault)) {
+        this.command.loadBalancer[key][0].useAsDefault = true;
+      }
     };
 
     this.remove = (key, index) => {
       let [removed] = this.command.loadBalancer[key].splice(index, 1);
 
-      if (removed.useAsDefault) {
-        _.first(this.command.loadBalancer[key]).useAsDefault = true;
+      if (removed.useAsDefault && this.command.loadBalancer[key][0]) {
+        this.command.loadBalancer[key][0].useAsDefault = true;
       }
     };
 
@@ -93,6 +99,9 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
     });
 
     this.submit = () => {
+
+      let serializedCommand = gceHttpLoadBalancerTransformer.serialize(this.command);
+
       let lb = this.loadBalancer;
       lb.hostRules = this.renderedData.hostRules;
       lb.defaultService = this.renderedData.backendServices.find(service => service.useAsDefault);

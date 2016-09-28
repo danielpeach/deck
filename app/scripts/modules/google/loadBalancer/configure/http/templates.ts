@@ -8,7 +8,7 @@ export class HttpLoadBalancerTemplate {
   certificate: string = '';
   defaultService: BackendServiceTemplate;
   hostRules: HostRuleTemplate[] = [];
-  listeners: ListenerTemplate = new ListenerTemplate();
+  listeners: ListenerTemplate[] = [new ListenerTemplate()];
 
   constructor (public credentials: string | null) {}
 }
@@ -43,6 +43,6 @@ export class PathRuleTemplate {
 }
 
 export class ListenerTemplate {
-  portRanges: number[] = [];
+  port: number;
   certificate: string | null = null;
 }

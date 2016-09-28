@@ -3,9 +3,11 @@
   <div class="container-fluid form-horizontal">
     <div class="form-group">
       <div class="col-md-12 well alert-warning"
-           ng-if="$ctrl.warn()">
+           ng-if="$ctrl.showModifiedWarning()">
         <strong ng-if="$ctrl.editExisting">You are modifying the backend service:</strong>
         <span>{{ $ctrl.backendService.name }}</span>
+        <button class="btn btn-default pull-right" ng-click="$ctrl.revert()"><span class="glyphicon glyphicon-flash"></span> Revert
+        </button>
       </div>
 
       <div class="col-md-12 well alert-danger"

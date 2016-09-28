@@ -5,6 +5,7 @@ import {PathRuleTemplate} from '../templates.ts';
 
 module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.hostRule.component', [
     require('../pathRule/pathRule.component.js'),
+    require('../../../../../core/utils/lodash.js'),
   ])
   .component('gceHostRule', {
     bindings: {
@@ -14,7 +15,7 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.hostRule.co
       deleteHostRule: '&'
     },
     templateUrl: require('./hostRule.component.html'),
-    controller: function () {
+    controller: function (_) {
       this.loadBalancer = this.command.loadBalancer;
       let pathRules = this.hostRule.pathMatcher.pathRules;
 
@@ -25,5 +26,10 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.hostRule.co
       this.deletePathRule = (index) => {
         pathRules.splice(index, 1);
       };
+
+      this.getAllBackendServices = () => {
+        let allBackendServices = this.loadBalancer.backendServices.concat(this.command.backingData.backendServices);
+        return _.compact(_.uniq(allBackendServices.map((service) => service.name)));
+      }
     }
   });

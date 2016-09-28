@@ -2,7 +2,9 @@
 
 let angular = require('angular');
 
-module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.pathRule.component', [])
+module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.pathRule.component', [
+    require('../../../../../core/utils/lodash.js'),
+  ])
   .component('gcePathRule', {
     bindings: {
       pathRule: '=',
@@ -11,6 +13,12 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.pathRule.co
       deletePathRule: '&'
     },
     templateUrl: require('./pathRule.component.html'),
-    controller: function () {
+    controller: function (_) {
+      this.getAllBackendServices = () => {
+        let allBackendServices = this.command.loadBalancer.backendServices
+          .concat(this.command.backingData.backendServices);
+
+        return _.compact(_.uniq(allBackendServices.map((service) => service.name)));
+      }
     }
   });

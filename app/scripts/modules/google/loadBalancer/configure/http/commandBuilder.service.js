@@ -39,14 +39,22 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backing.ser
 
       mapHealthCheckNamesToBackendServices(healthChecks, backendServices);
 
+      let backendServicesKeyedByName = keyByProperty(backendServices, 'name');
+      let backendServicesKeyedByNameCopy = _.cloneDeep(backendServicesKeyedByName);
+
+      let healthChecksKeyedByName = keyByProperty(healthChecks, 'name');
+      let healthChecksKeyedByNameCopy = _.cloneDeep(healthChecksKeyedByName);
+
       return {
         backendServices,
         healthChecks,
         certificates,
         accounts,
         globalLoadBalancersKeyedByAccount,
-        backendServicesKeyedByName: keyByProperty(backendServices, 'name'),
-        healthChecksKeyedByName: keyByProperty(healthChecks, 'name'),
+        backendServicesKeyedByName,
+        backendServicesKeyedByNameCopy,
+        healthChecksKeyedByName,
+        healthChecksKeyedByNameCopy,
       };
     }
 

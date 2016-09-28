@@ -6,7 +6,7 @@
                        default-service-manager="ctrl.command.defaultServiceManager(ctrl.command, backendService)"
                        delete-service="ctrl.remove('backendServices', $index)"></gce-backend-service>
   <div class="form-group small" style="margin-top: 20px">
-    <div class="col-md-offset-4 col-md-6">
+    <div class="col-md-offset-2 col-md-6">
       <gce-cache-refresh cache-key="backendServices"
                          cache-key-alias="backend services"
                          on-refresh="ctrl.command.onBackendServiceRefresh()"></gce-cache-refresh>

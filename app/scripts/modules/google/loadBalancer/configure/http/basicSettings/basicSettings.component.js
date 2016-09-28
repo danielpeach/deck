@@ -14,7 +14,7 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.basicSettin
       application: '=',
     },
     templateUrl: require('./basicSettings.component.html'),
-    controller: function ($scope, accountService, loadBalancerReader, _, elSevenUtils, $q) {
+    controller: function ($scope, accountService, loadBalancerReader, _) {
       let c = this.command;
       this.loadBalancer = c.loadBalancer;
       this.accounts = c.backingData.accounts;
@@ -26,7 +26,7 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.basicSettin
       };
 
       this.updateName = (lb, appName) => {
-        lb.name = this.getName(lb, appName);
+        lb.urlMapName = this.getName(lb, appName);
       };
 
       this.updateExistingLoadBalancerNames = (account) => {

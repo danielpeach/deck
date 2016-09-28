@@ -35,10 +35,10 @@
       <ui-select ng-model="$ctrl.pathRule.backendService"
                  class="form-control input-sm">
         <ui-select-match placeholder="Select...">
-          {{$select.selected.name}}
+          {{$select.selected}}
         </ui-select-match>
-        <ui-select-choices repeat="backendService in $ctrl.command.loadBalancer.backendServices | filter: {name: $select.search}">
-          <div ng-bind-html="backendService.name | highlight: $select.search"></div>
+        <ui-select-choices repeat="backendService in $ctrl.getAllBackendServices() | filter: $select.search">
+          <div ng-bind-html="backendService | highlight: $select.search"></div>
         </ui-select-choices>
       </ui-select>
     </div>
