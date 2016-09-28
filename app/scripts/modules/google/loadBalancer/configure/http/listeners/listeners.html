@@ -1,11 +1,8 @@
 <ng-form name="listeners">
-  <gce-listeners
-    backing-data="ctrl.backingData"
-    aggregate-data="ctrl.aggregateData"
-    listeners="ctrl.loadBalancer.listeners"></gce-listeners>
+  <gce-listeners command="ctrl.command"></gce-listeners>
   <div class="form-group small" style="margin-top: 20px">
     <div class="col-md-offset-4 col-md-6">
-      <gce-cache-refresh cache-key="certificates" on-refresh="ctrl.onCertificateRefresh()"></gce-cache-refresh>
+      <gce-cache-refresh cache-key="certificates" on-refresh="ctrl.command.onCertificateRefresh()"></gce-cache-refresh>
     </div>
   </div>
 </ng-form>

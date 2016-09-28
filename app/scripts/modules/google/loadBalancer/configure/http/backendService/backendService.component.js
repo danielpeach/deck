@@ -1,6 +1,7 @@
 'use strict';
 
 let angular = require('angular');
+import {BackendServiceTemplate} from '../templates.ts';
 
 module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backendService.component', [
     require('../../../../../core/utils/lodash.js'),
@@ -8,58 +9,64 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backendServ
   .component('gceBackendService', {
     bindings: {
       deleteService: '&',
-      backingData: '=',
-      renderedData: '=',
-      aggregateData: '=',
+      backendService: '=',
+      command: '=',
       index: '=',
       defaultServiceManager: '&'
     },
     templateUrl: require('./backendService.component.html'),
     controller: function (_) {
-      this.rendered = this.renderedData.backendServices;
-      let i = this.index,
-        servicesByName = this.backingData.backendServicesKeyedByName,
-        healthChecksByName = this.backingData.healthChecksKeyedByName;
+      this.backingData = this.command.backingData;
+      let loadBalancer = this.command.loadBalancer;
+      let servicesByName = this.backingData.backendServicesKeyedByName;
 
       this.onBackendServiceSelect = (selectedBackendService) => {
+        assign(selectedBackendService);
         setAsDefaultIfNecessary(selectedBackendService);
-        addHealthCheckToRendered(selectedBackendService);
       };
 
-      this.onBackendServiceNameChange = (typedServiceName) => {
-        let serviceMatchingTypedName = servicesByName[typedServiceName];
-        if (serviceMatchingTypedName) {
+      this.onBackendServiceNameChange = (typedName) => {
+        let matchingService = servicesByName[typedName];
+        if (matchingService) {
           this.editExisting = true;
-          _.assign(this.rendered[i], serviceMatchingTypedName);
-          setAsDefaultIfNecessary(this.rendered[i]);
-          addHealthCheckToRendered(this.rendered[i]);
+          assign(matchingService);
+          setAsDefaultIfNecessary(matchingService);
         }
       };
 
       this.toggleEditExisting = () => {
         this.editExisting = !this.editExisting;
         if (!this.editExisting) {
-          _.assign(this.rendered[i], this.backendService);
-          delete this.rendered[i].name;
-          setAsDefaultIfNecessary(this.rendered[i]);
-          addHealthCheckToRendered(this.rendered[i]);
+          let template = new BackendServiceTemplate()
+          assign(template);
+          setAsDefaultIfNecessary(template);
         }
       };
 
+      this.getAllHealthChecks = () => {
+        let healthCheckNames = loadBalancer.healthChecks.map((hc) => hc.name);
+        if (this.backendService.healthCheck) {
+          healthCheckNames = healthCheckNames.concat([this.backendService.healthCheck]);
+        }
+        return _.uniq(healthCheckNames);
+      };
+
+      this.warn = () => this.originalService && !_.isEqual(this.originalService, this.backendService);
+
+
       let setAsDefaultIfNecessary = (service) => {
-        if (!this.rendered.find((service) => service.useAsDefault)) {
+        if (!loadBalancer.backendServices.find((service) => service.useAsDefault)) {
           service.useAsDefault = true;
         }
       };
 
-      let addHealthCheckToRendered = (service) => {
-        if (!this.renderedData.healthChecks.find((hc) => hc.name === service.healthCheck)) {
-          this.renderedData.healthChecks.push(healthChecksByName[service.healthCheck]);
-        }
-      };
-
-      if (this.backingData.backendServicesKeyedByName[this.rendered[i].name]) {
+      if (servicesByName[this.backendService.name]) {
         this.editExisting = true;
       }
+
+      let assign = (toAssign) => {
+        this.originalService = _.cloneDeep(toAssign);
+        loadBalancer.backendServices[this.index] = this.backendService = toAssign;
+      };
     }
   });

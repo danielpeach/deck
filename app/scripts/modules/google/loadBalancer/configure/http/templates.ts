@@ -15,8 +15,9 @@ export class HttpLoadBalancerTemplate {
 
 export class BackendServiceTemplate {
   backends = [];
-  useAsDefault: boolean = false;
   healthCheck: HealthCheckTemplate;
+
+  constructor(public useAsDefault: boolean = false) {}
 }
 
 export class HealthCheckTemplate {
@@ -30,14 +31,14 @@ export class HealthCheckTemplate {
 
 export class HostRuleTemplate {
   hostPatterns: string[];
-  pathMatcher: PathMatcherTemplate;
+  pathMatcher: PathMatcherTemplate = new PathMatcherTemplate;
 }
 
-class PathMatcherTemplate {
-  pathRules: PathRuleTemplate[];
+export class PathMatcherTemplate {
+  pathRules: PathRuleTemplate[] = [];
 }
 
-class PathRuleTemplate {
+export class PathRuleTemplate {
   paths: string[];
 }
 

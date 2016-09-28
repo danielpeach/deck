@@ -1,6 +1,7 @@
 'use strict';
 
 let angular = require('angular');
+import {HealthCheckTemplate} from '../templates.ts';
 
 module.exports = angular.module('spinnaker.deck.httpLoadBalancer.healthCheck.component', [
     require('../../../../../core/utils/lodash.js'),
@@ -9,39 +10,43 @@ module.exports = angular.module('spinnaker.deck.httpLoadBalancer.healthCheck.com
   ])
   .component('gceHttpLoadBalancerHealthCheck', {
     bindings: {
-      backingData: '=',
+      command: '=',
       deleteHealthCheck: '&',
       healthCheck: '=',
       index: '=',
-      renderedData: '=',
     },
     templateUrl: require('./healthCheck.component.html'),
     controller: function (_) {
       this.max = Number.MAX_SAFE_INTEGER;
+      this.backingData = this.command.backingData;
+      let loadBalancer = this.command.loadBalancer;
+      let healthChecksByName = this.backingData.healthChecksKeyedByName;
 
-      this.onHealthCheckSelect = (healthCheck) => {
-        _.assign(this.renderedData.healthChecks[this.index], healthCheck);
+      this.onHealthCheckSelect = (selectedHealthCheck) => {
+        assign(selectedHealthCheck);
       };
 
-      this.onHealthCheckNameChange = (healthCheckName) => {
-        if (this.backingData.healthChecksKeyedByName[healthCheckName]) {
+      this.onHealthCheckNameChange = (typedName) => {
+        let matchingHealthCheck = healthChecksByName[typedName];
+        if (matchingHealthCheck) {
           this.editExisting = true;
-          _.assign(
-            this.renderedData.healthChecks[this.index],
-            this.backingData.healthChecksKeyedByName[healthCheckName]);
+          assign(matchingHealthCheck);
         }
       };
 
       this.toggleEditExisting = () => {
         this.editExisting = !this.editExisting;
         if (!this.editExisting) {
-          _.assign(this.renderedData.healthChecks[this.index], this.healthCheck);
-          delete this.healthCheck.name;
+          assign(new HealthCheckTemplate());
         }
       };
 
-      if (this.backingData.healthChecksKeyedByName[this.healthCheck.name]) {
+      if (healthChecksByName[this.healthCheck.name]) {
         this.editExisting = true;
       }
+
+      let assign = (toAssign) => {
+        loadBalancer.healthChecks[this.index] = this.healthCheck = toAssign;
+      };
     }
   });

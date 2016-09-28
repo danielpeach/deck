@@ -31,14 +31,16 @@
     <div class="col-md-4 sm-label-right">
       <b>Backend Service</b>
     </div>
-    <div class="col-md-3 small text-center" ng-if="!$ctrl.oneBackendServiceIsConfigured()">
-      Configure at least one backend service
-    </div>
-    <div class="col-md-3" ng-if="$ctrl.oneBackendServiceIsConfigured()">
-      <select class="form-control input-sm" required
-              ng-model="$ctrl.pathRule.backendService"
-              ng-options="backendService.name for backendService in $ctrl.backendServices | filter:$ctrl.isNameDefined">
-      </select>
+    <div class="col-md-3">
+      <ui-select ng-model="$ctrl.pathRule.backendService"
+                 class="form-control input-sm">
+        <ui-select-match placeholder="Select...">
+          {{$select.selected.name}}
+        </ui-select-match>
+        <ui-select-choices repeat="backendService in $ctrl.command.loadBalancer.backendServices | filter: {name: $select.search}">
+          <div ng-bind-html="backendService.name | highlight: $select.search"></div>
+        </ui-select-choices>
+      </ui-select>
     </div>
   </div>
 </div>

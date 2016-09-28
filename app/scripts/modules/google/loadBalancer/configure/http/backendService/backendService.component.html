@@ -2,13 +2,12 @@
 <ng-form name="backendService">
   <div class="container-fluid form-horizontal">
     <div class="form-group">
-      <div class="col-md-12 well"
-           ng-if="$ctrl.rendered[$ctrl.index].name"
-           ng-class="$ctrl.editExisting ? 'alert-warning' : 'alert-info'">
-        <strong ng-if="$ctrl.editExisting">You are editing the backend service:</strong>
-        <strong ng-if="!$ctrl.editExisting">Your backend service will be named:</strong>
-        <span>{{ $ctrl.rendered[$ctrl.index].name }}</span>
+      <div class="col-md-12 well alert-warning"
+           ng-if="$ctrl.warn()">
+        <strong ng-if="$ctrl.editExisting">You are modifying the backend service:</strong>
+        <span>{{ $ctrl.backendService.name }}</span>
       </div>
+
       <div class="col-md-12 well alert-danger"
            ng-if="backendService.serviceName.$error.pattern || backendService.serviceName.$error.max">
         <validation-error
@@ -20,7 +19,7 @@
       <div class="col-md-4 sm-label-right">Name</div>
 
       <div class="col-md-4" ng-if="$ctrl.editExisting">
-        <ui-select ng-model="$ctrl.rendered[$ctrl.index]"
+        <ui-select ng-model="$ctrl.backendService"
                    on-select="$ctrl.onBackendServiceSelect($item)"
                    class="form-control input-sm">
           <ui-select-match placeholder="Select...">
@@ -34,14 +33,14 @@
 
       <div class="col-md-4" ng-if="!$ctrl.editExisting">
         <input class="form-control input-sm"
-               ng-change="$ctrl.onBackendServiceNameChange($ctrl.rendered[$ctrl.index].name)"
+               ng-change="$ctrl.onBackendServiceNameChange($ctrl.backendService.name)"
                required
                type="text"
                name="serviceName"
                ng-pattern="/^[a-z]([-a-z0-9]*[a-z0-9])?$/"
                max="63"
                ng-model-options="{ debounce: 250 }"
-               ng-model="$ctrl.rendered[$ctrl.index].name"/>
+               ng-model="$ctrl.backendService.name"/>
       </div>
 
       <div class="col-md-1">
@@ -70,14 +69,15 @@
         <b>Health Check</b>
       </div>
       <div class="col-md-4">
-        <ui-select ng-model="$ctrl.rendered[$ctrl.index].healthCheck"
+        <ui-select ng-model="$ctrl.backendService.healthCheck"
+                   required
                    class="form-control input-sm">
           <ui-select-match placeholder="Select...">
             {{$select.selected}}
           </ui-select-match>
           <ui-select-choices
-            repeat="healthCheck in $ctrl.aggregateData.healthChecks | filter:$ctrl.isNameDefined">
-            <div ng-bind-html="healthCheck"></div>
+            repeat="healthCheck in $ctrl.getAllHealthChecks() | filter: $select.search">
+            <div ng-bind-html="healthCheck | highlight: $select.search"></div>
           </ui-select-choices>
         </ui-select>
       </div>
@@ -85,7 +85,7 @@
         <label class="sm-label-right">Default service
           <help-field key="gce.httpLoadBalancer.backendService.default"></help-field>
         </label>
-        <input type="checkbox" ng-model="$ctrl.rendered[$ctrl.index].useAsDefault" ng-change="$ctrl.defaultServiceManager()"/>
+        <input type="checkbox" ng-model="$ctrl.backendService.useAsDefault" ng-change="$ctrl.defaultServiceManager()"/>
       </div>
     </div>
   </div>

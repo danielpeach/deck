@@ -1,17 +1,15 @@
 <ng-form name="backendServices">
-  <gce-backend-service ng-repeat="backendService in ctrl.renderedData.backendServices"
+  <gce-backend-service ng-repeat="backendService in ctrl.command.loadBalancer.backendServices"
                        backend-service="backendService"
                        index="$index"
-                       backing-data="ctrl.backingData"
-                       rendered-data="ctrl.renderedData"
-                       aggregate-data="ctrl.aggregateData"
-                       default-service-manager="ctrl.defaultServiceManager(backendService)"
+                       command="ctrl.command"
+                       default-service-manager="ctrl.command.defaultServiceManager(ctrl.command, backendService)"
                        delete-service="ctrl.remove('backendServices', $index)"></gce-backend-service>
   <div class="form-group small" style="margin-top: 20px">
     <div class="col-md-offset-4 col-md-6">
       <gce-cache-refresh cache-key="backendServices"
                          cache-key-alias="backend services"
-                         on-refresh="ctrl.onBackendServiceRefresh()"></gce-cache-refresh>
+                         on-refresh="ctrl.command.onBackendServiceRefresh()"></gce-cache-refresh>
     </div>
   </div>
   <div class="row">

@@ -10,7 +10,6 @@
                  tagging-label=""
                  ng-model="$ctrl.hostRule.hostPatterns"
                  class="form-control input-sm"
-                 sortable="true"
                  style="width: 150px;">
         <ui-select-match>{{$item}}</ui-select-match>
         <ui-select-choices repeat="hostPattern in []">
@@ -31,16 +30,21 @@
       <b>Default Service</b>
     </div>
     <div class="col-md-3">
-      <select class="form-control input-sm" required
-              ng-model="$ctrl.hostRule.pathMatcher.defaultService"
-              ng-options="backendService.name for backendService in $ctrl.renderedData.backendServices.concat($ctrl.backingData.backendServices) | filter:$ctrl.isNameDefined">
-      </select>
+      <ui-select ng-model="$ctrl.hostRule.patchMatcher.defaultService"
+                 class="form-control input-sm">
+        <ui-select-match placeholder="Select...">
+          {{$select.selected.name}}
+        </ui-select-match>
+        <ui-select-choices repeat="backendService in $ctrl.loadBalancer.backendServices | filter: {name: $select.search}">
+          <div ng-bind-html="backendService.name | highlight: $select.search"></div>
+        </ui-select-choices>
+      </ui-select>
     </div>
   </div>
   <collapsible-section heading="Path Rules" expanded="true" subsection="true">
     <gce-path-rule path-rule="pathRule"
                    index="$index"
-                   backend-services="$ctrl.backendServices"
+                   command="$ctrl.command"
                    delete-path-rule="$ctrl.deletePathRule($index)"
                    ng-repeat="pathRule in $ctrl.hostRule.pathMatcher.pathRules">
     </gce-path-rule>

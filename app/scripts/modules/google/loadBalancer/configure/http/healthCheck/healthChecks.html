@@ -1,15 +1,14 @@
 <ng-form name="healthChecks">
-  <gce-http-load-balancer-health-check ng-repeat="healthCheck in ctrl.renderedData.healthChecks"
+  <gce-http-load-balancer-health-check ng-repeat="healthCheck in ctrl.command.loadBalancer.healthChecks"
                                        index="$index"
-                                       backing-data="ctrl.backingData"
-                                       rendered-data="ctrl.renderedData"
+                                       command="ctrl.command"
                                        delete-health-check="ctrl.remove('healthChecks', $index)"
                                        health-check="healthCheck"></gce-http-load-balancer-health-check>
   <div class="form-group small" style="margin-top: 20px">
     <div class="col-md-offset-4 col-md-6">
       <gce-cache-refresh cache-key="httpHealthChecks"
                          cache-key-alias="health checks"
-                         on-refresh="ctrl.onHealthCheckRefresh()"></gce-cache-refresh>
+                         on-refresh="ctrl.command.onHealthCheckRefresh()"></gce-cache-refresh>
     </div>
   </div>
   <div class="row">
