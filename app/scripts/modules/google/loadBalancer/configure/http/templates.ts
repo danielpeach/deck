@@ -4,7 +4,6 @@ export class HttpLoadBalancerTemplate {
   detail: string = '';
   region: string = 'global';
   loadBalancerType: string = 'HTTP';
-  portRange: string = '80';
   certificate: string = '';
   defaultService: BackendServiceTemplate;
   hostRules: HostRuleTemplate[] = [];
@@ -43,6 +42,7 @@ export class PathRuleTemplate {
 }
 
 export class ListenerTemplate {
+  name: string;
   port: number;
   certificate: string | null = null;
 }

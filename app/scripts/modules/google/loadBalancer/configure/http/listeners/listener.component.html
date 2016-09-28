@@ -62,20 +62,21 @@
           </ui-select-choices>
         </ui-select>
       </div>
-
-      <div class="col-md-2 sm-label-right">Certificate
-        <help-field key="gce.httpLoadBalancer.certificate"></help-field>
-      </div>
-      <div class="col-md-3">
-        <ui-select ng-model="$ctrl.listener.certificate"
-                   ng-required="$ctrl.certificateRequired($ctrl.listener.port)"
-                   class="form-control input-sm">
-          <ui-select-match allow-clear placeholder="Select...">{{$select.selected}}</ui-select-match>
-          <ui-select-choices
-            repeat="certificate in $ctrl.certificates | filter: $select.search">
-            <span ng-bind-html="certificate | highlight: $select.search"></span>
-          </ui-select-choices>
-        </ui-select>
+      <div ng-if="$ctrl.listener.port === 443">
+        <div class="col-md-2 sm-label-right">Certificate
+          <help-field key="gce.httpLoadBalancer.certificate"></help-field>
+        </div>
+        <div class="col-md-3">
+          <ui-select ng-model="$ctrl.listener.certificate"
+                     required
+                     class="form-control input-sm">
+            <ui-select-match allow-clear placeholder="Select...">{{$select.selected}}</ui-select-match>
+            <ui-select-choices
+              repeat="certificate in $ctrl.certificates | filter: $select.search">
+              <span ng-bind-html="certificate | highlight: $select.search"></span>
+            </ui-select-choices>
+          </ui-select>
+        </div>
       </div>
     </div>
 

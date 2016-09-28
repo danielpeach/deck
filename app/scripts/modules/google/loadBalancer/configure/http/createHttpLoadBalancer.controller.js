@@ -99,19 +99,11 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancer.createHttp.cont
     });
 
     this.submit = () => {
-
-      let serializedCommand = gceHttpLoadBalancerTransformer.serialize(this.command);
-
-      let lb = this.loadBalancer;
-      lb.hostRules = this.renderedData.hostRules;
-      lb.defaultService = this.renderedData.backendServices.find(service => service.useAsDefault);
-      if (!lb.credentials) {
-        lb.credentials = lb.account;
-      }
-
+      let serializedCommands = gceHttpLoadBalancerTransformer.serialize(this.command);
+      debugger;
       let descriptor = this.isNew ? 'Create' : 'Update';
 
-      this.taskMonitor.submit(() => gceHttpLoadBalancerWriter.upsertLoadBalancer(lb, application, descriptor));
+      this.taskMonitor.submit(() => gceHttpLoadBalancerWriter.upsertLoadBalancers(serializedCommands, application, descriptor));
     };
 
     gceHttpLoadBalancerCommandBuilder.buildCommand({ isNew, loadBalancer })

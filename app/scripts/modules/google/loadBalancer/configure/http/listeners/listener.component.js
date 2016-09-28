@@ -17,8 +17,6 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.listener.co
     controller: function (_) {
       this.certificates = this.command.backingData.certificates;
 
-      this.certificateRequired = (port) => port === 443;
-
       this.getName = (listener, applicationName) => {
         let listenerName = [applicationName, (listener.stack || ''), (listener.detail || '')].join('-');
         return _.trimRight(listenerName, '-');

@@ -7,21 +7,23 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.write.servi
     require('../../../../core/cache/infrastructureCaches.js')
   ])
   .factory('gceHttpLoadBalancerWriter', function (taskExecutor, infrastructureCaches) {
-    function upsertLoadBalancer (lb, application, descriptor) {
-      angular.extend(lb, {
-        type: 'upsertLoadBalancer',
-        cloudProvider: 'gce',
-        loadBalancerName: lb.name
+    function upsertLoadBalancers (loadBalancers, application, descriptor) {
+      loadBalancers.forEach((lb) => {
+        angular.extend(lb, {
+          type: 'upsertLoadBalancer',
+          cloudProvider: 'gce',
+          loadBalancerName: lb.name
+        });
       });
 
       infrastructureCaches.clearCache('loadBalancers');
 
       return taskExecutor.executeTask({
-        job: [lb],
+        job: loadBalancers,
         application: application,
-        description: `${descriptor} Load Balancer: ${lb.name}`
+        description: `${descriptor} Load Balancer: ${loadBalancers[0].urlMapName}`
       });
     }
 
-    return { upsertLoadBalancer };
+    return { upsertLoadBalancers };
   });
