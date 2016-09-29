@@ -68,7 +68,7 @@ module.exports = angular.module('spinnaker.gce.deck.httpLoadBalancer.transformer
         command = _.omit(command, keysToOmit);
         command.name = listener.name;
         command.portRange = listener.port;
-        command.certificate = listener.certificate || null; // '' is JS false.
+        command.certificate = listener.certificate || null;
 
         return command;
       });
@@ -86,12 +86,16 @@ module.exports = angular.module('spinnaker.gce.deck.httpLoadBalancer.transformer
     function deserialize (loadBalancer) {
       let backendServices = getBackendServices(loadBalancer);
       let healthChecks = getHealthChecks(backendServices);
+      debugger;
       let hostRules = getHostRules(loadBalancer);
-      let certificate = loadBalancer.certificate;
-
-      // normalizeLoadBalancer(loadBalancer);
-
-      return { backendServices, healthChecks, hostRules, };
+      mapBackendServicesToNames(hostRules);
+      return {
+        backendServices,
+        healthChecks,
+        hostRules,
+        ports: loadBalancer.ports,
+        certificate: loadBalancer.certificate,
+      };
     }
 
     function getBackendServices (loadBalancer) {
@@ -129,17 +133,8 @@ module.exports = angular.module('spinnaker.gce.deck.httpLoadBalancer.transformer
       return loadBalancer.hostRules;
     }
 
-    function mapBackendServicesToNames (loadBalancer) {
-      /*
-       places to spot a backend service:
-       1). loadBalancer.defaultService
-       2). hostRule.pathMatcher.defaultService
-       3). pathRule.backendService
-       */
-
-      loadBalancer.defaultService = loadBalancer.defaultService.name;
-
-      loadBalancer.hostRules.forEach((hostRule) => {
+    function mapBackendServicesToNames (hostRules) {
+      hostRules.forEach((hostRule) => {
         let p = hostRule.pathMatcher;
 
         p.defaultService = p.defaultService.name;
@@ -154,11 +149,6 @@ module.exports = angular.module('spinnaker.gce.deck.httpLoadBalancer.transformer
       backendServices.forEach((service) => {
         service.healthCheck = service.healthCheck.name;
       });
-    }
-
-    function normalizeLoadBalancer (loadBalancer) {
-      mapBackendServicesToNames(loadBalancer);
-      delete loadBalancer.instances;
     }
 
     return { serialize, deserialize };

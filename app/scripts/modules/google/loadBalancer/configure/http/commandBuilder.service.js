@@ -12,14 +12,15 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backing.ser
     require('../../../certificate/certificate.reader.js'),
     require('./editStateUtils.service.js'),
     require('../../../../core/account/account.service.js'),
-    require('../../../../core/loadBalancer/loadBalancer.read.service.js')
+    require('../../../../core/loadBalancer/loadBalancer.read.service.js'),
+    require('./transformer/transformer.service.js'),
   ])
   .factory('gceHttpLoadBalancerCommandBuilder', function ($q, _, accountService,
                                                           elSevenUtils,
                                                           gceBackendServiceReader,
                                                           gceCertificateReader,
                                                           gceHttpHealthCheckReader,
-                                                          gceHttpLoadBalancerEditStateUtils,
+                                                          gceHttpLoadBalancerTransformer,
                                                           loadBalancerReader, settings) {
 
     /*
@@ -30,7 +31,9 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backing.ser
       let healthChecksKeyedBySelfLink = keyByProperty(healthChecks, 'selfLink');
 
       backendServices.forEach((service) => {
-        service.healthCheck = healthChecksKeyedBySelfLink[service.healthCheckLink].name;
+        if (healthChecksKeyedBySelfLink[service.healthCheckLink]) {
+          service.healthCheck = healthChecksKeyedBySelfLink[service.healthCheckLink].name;
+        }
       });
     }
 
@@ -65,7 +68,7 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backing.ser
       let mixinData = isNew
         ? { backendServices: [new BackendServiceTemplate(true)],
             healthChecks: [new HealthCheckTemplate()], }
-        : gceHttpLoadBalancerEditStateUtils.getRenderedData(loadBalancer);
+        : gceHttpLoadBalancerTransformer.deserialize(loadBalancer);
 
       let loadBalancerData = _.assign(loadBalancerTemplate, mixinData);
 
@@ -144,7 +147,7 @@ module.exports = angular.module('spinnaker.deck.gce.httpLoadBalancer.backing.ser
             globalLoadBalancersKeyedByAccount
           });
 
-          let loadBalancer = buildLoadBalancerData(isNew, loadBalancer, backingData);
+          loadBalancer = buildLoadBalancerData(isNew, loadBalancer, backingData);
 
           return {
             backingData,
