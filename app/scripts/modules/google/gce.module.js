@@ -3,6 +3,7 @@
 let angular = require('angular');
 
 import gceLoadBalancerSetTransformer from './loadBalancer/loadBalancer.setTransformer';
+import gceInternalLoadBalancerCtrl from './loadBalancer/configure/internal/gceCreateInternalLoadBalancer.controller';
 
 require('./logo/gce.logo.less');
 
@@ -14,6 +15,7 @@ templates.keys().forEach(function(key) {
 
 module.exports = angular.module('spinnaker.gce', [
   require('core/cloudProvider/cloudProvider.registry.js'),
+  gceInternalLoadBalancerCtrl,
   gceLoadBalancerSetTransformer,
   require('./serverGroup/details/serverGroup.details.gce.module.js'),
   require('./serverGroup/configure/serverGroupCommandBuilder.service.js'),
