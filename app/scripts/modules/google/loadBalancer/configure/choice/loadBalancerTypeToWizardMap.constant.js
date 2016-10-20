@@ -1,6 +1,7 @@
 'use strict';
 
 let angular = require('angular');
+import gceInternalLoadBalancerCtrl from '../internal/gceCreateInternalLoadBalancer.controller';
 
 module.exports = angular.module('spinnaker.deck.gce.loadBalancerTypeToWizard.constant', [])
   .constant('loadBalancerTypeToWizardMap', {
@@ -13,5 +14,10 @@ module.exports = angular.module('spinnaker.deck.gce.loadBalancerTypeToWizard.con
       createTemplateUrl: require('../http/createHttpLoadBalancer.html'),
       editTemplateUrl: require('../http/editHttpLoadBalancer.html'),
       controller: 'gceCreateHttpLoadBalancerCtrl'
+    },
+    'Internal': {
+      createTemplateUrl: require('../internal/createInternalLoadBalancer.html'),
+      editTemplateUrl: require('../internal/editInternalLoadBalancer.html'),
+      controller: gceInternalLoadBalancerCtrl,
     }
   });
