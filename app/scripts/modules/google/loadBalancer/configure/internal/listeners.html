@@ -6,21 +6,14 @@
         <thead>
         <tr>
           <th>Protocol</th>
-          <th>Port Range <help-field key="gce.loadBalancer.portRange"></help-field></th>
+          <th>Ports<help-field key="gce.loadBalancer.portRange"></help-field></th>
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="listener in loadBalancer.listeners">
+        <tr>
           <td><select class="form-control input-sm" ng-model="listener.protocol"
                       ng-options="protocol for protocol in ['TCP', 'UDP']"></select></td>
           <td><input class="form-control input-sm" ng-model="listener.portRange"/></td>
-        </tr>
-        <tr>
-          <td>
-            <label><input type="checkbox" ng-model="loadBalancer.listeners[0].healthCheck" ng-change="ctrl.setVisibilityHealthCheckTab()" />
-              Enable health check? <help-field key="gce.loadBalancer.healthCheck"></help-field>
-            </label>
-          </td>
         </tr>
         </tbody>
       </table>

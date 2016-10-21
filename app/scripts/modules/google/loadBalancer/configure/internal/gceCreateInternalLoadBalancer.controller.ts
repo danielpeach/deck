@@ -35,6 +35,10 @@ class InternalLoadBalancer {
   constructor (public region?: string) {}
 }
 
+interface loadBalancerNameMap {
+  [k: string]: { [k: string] : string[] };
+}
+
 class InternalLoadBalancerCtrl implements ng.IComponentController {
   pages: { [k:string]: string } = {
     'location': require('./createLoadBalancerProperties.html'),
@@ -45,6 +49,7 @@ class InternalLoadBalancerCtrl implements ng.IComponentController {
   accounts: ICredentials[];
   regions: string[];
   subnets: IGoogleSubnet[];
+  loadBalancerNameMap: loadBalancerNameMap;
   existingLoadBalancerNames: string[];
 
   static get $inject () {
@@ -82,15 +87,18 @@ class InternalLoadBalancerCtrl implements ng.IComponentController {
 
     let loadBalancerNamePromise = this.loadBalancerReader.listLoadBalancers('gce')
       .then((loadBalancers) => {
-        return _.chain(loadBalancers.accounts)
+        return _.chain(loadBalancers)
+          .map('accounts')
           .flatten()
           .groupBy('name') // account name
-          .mapValues((account) => {
-            return _.chain(account.regions)
+          .mapValues((accounts) => {
+            return _.chain(accounts)
+              .map('regions')
               .flatten()
               .map('loadBalancers')
               .flatten()
               .groupBy('region')
+              .mapValues((loadBalancers) => _.map(loadBalancers, 'name'))
               .value();
           })
           .value();
@@ -100,8 +108,11 @@ class InternalLoadBalancerCtrl implements ng.IComponentController {
       accounts: this.accountService.listAccounts('gce'),
       subnets: this.subnetReader.listSubnetsByProvider('gce'),
       loadBalancerNames: loadBalancerNamePromise,
-    }).then(({ accounts, subnets, loadBalancerNames } : { accounts: ICredentials[], subnets: IGoogleSubnet[], loadBalancerNames: string[] }) => {
-      this.accounts = accounts;
+    }).then(({ accounts,
+               subnets,
+               loadBalancerNames } : { accounts: ICredentials[],
+                                       subnets: IGoogleSubnet[],
+                                       loadBalancerNames: loadBalancerNameMap }) => {
       let accountNames: string[] = accounts.map((a) => a.name);
 
       if (accountNames.length && !accountNames.includes(this.loadBalancer.credentials)) {
@@ -109,8 +120,10 @@ class InternalLoadBalancerCtrl implements ng.IComponentController {
       }
       this.accountUpdated();
 
+      this.accounts = accounts;
       this.subnets = subnets;
-      this.existingLoadBalancerNames = loadBalancerNames;
+      this.loadBalancerNameMap = loadBalancerNames;
+      this.loadBalancer.loadBalancerName = this.getName();
     });
   }
 
@@ -119,16 +132,18 @@ class InternalLoadBalancerCtrl implements ng.IComponentController {
       .then((regions: { name: string }[]) => {
         this.regions = regions.map((r) => r.name);
         this.regionUpdated();
+        this.existingLoadBalancerNames = this.loadBalancerNameMap[this.loadBalancer.credentials][this.loadBalancer.region];
       });
   }
 
   regionUpdated (): void {
     let lbRegion: string = this.loadBalancer.region;
     let subnet: IGoogleSubnet = this.subnets.find((s) => s.region === lbRegion);
-
     if (subnet) {
       this.loadBalancer.subnet = subnet.name;
     }
+
+    this.existingLoadBalancerNames = this.loadBalancerNameMap[this.loadBalancer.credentials][lbRegion];
   }
 
   getName (): string {
