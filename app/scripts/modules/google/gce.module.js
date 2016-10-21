@@ -38,7 +38,7 @@ module.exports = angular.module('spinnaker.gce', [
   require('./instance/custom/customInstance.filter.js'),
   require('./loadBalancer/loadBalancer.transformer.js'),
   require('./loadBalancer/details/loadBalancerDetail.controller.js'),
-  require('./loadBalancer/configure/createLoadBalancer.controller.js'),
+  require('./loadBalancer/configure/network/createLoadBalancer.controller.js'),
   require('./loadBalancer/configure/choice/gceLoadBalancerChoice.modal.js'),
   require('./loadBalancer/configure/http/createHttpLoadBalancer.controller.js'),
   require('./instance/details/instance.details.controller.js'),

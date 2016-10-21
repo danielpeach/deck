@@ -9,40 +9,66 @@
                style="display: none"
                ng-maxlength="63"
                class="form-control input-sm"
-               ng-model="loadBalancer.name"
+               ng-model="ctrl.loadBalancer.loadBalancerName"
                validate-unique="existingLoadBalancerNames"
                validate-ignore-case="true"
                name="loadBalancerName"/>
-        <validation-error ng-if="form.loadBalancerName.$error.validateUnique" message="There is already a load balancer in {{loadBalancer.credentials}} with that name."></validation-error>
+        <validation-error ng-if="form.loadBalancerName.$error.validateUnique"
+                          message="There is already a load balancer in {{ctrl.loadBalancer.credentials}} with that name."></validation-error>
       </div>
     </div>
     <div class="form-group">
-      <div class="col-md-3 sm-label-right">Account</div>
-      <div class="col-md-7">
-        <account-select-field component="loadBalancer" field="credentials" accounts="accounts" provider="'gce'" on-change="ctrl.accountUpdated()"></account-select-field>
+      <div class="col-md-2 sm-label-right">Account</div>
+      <div class="col-md-8">
+        <account-select-field component="ctrl.loadBalancer"
+                              field="credentials"
+                              accounts="ctrl.accounts"
+                              provider="'gce'"
+                              on-change="ctrl.accountUpdated()"></account-select-field>
       </div>
     </div>
-    <gce-region-select-field label-columns="3" component="loadBalancer" field="region" account="loadBalancer.credentials" on-change="ctrl.regionUpdated()" regions="regions"></gce-region-select-field>
+    <gce-region-select-field label-columns="2"
+                             field-columns="8"
+                             component="ctrl.loadBalancer"
+                             field="region"
+                             account="ctrl.loadBalancer.credentials"
+                             on-change="ctrl.regionUpdated()"
+                             regions="ctrl.regions"></gce-region-select-field>
     <div class="form-group">
-      <div class="col-md-3 sm-label-right">Stack <help-field key="aws.loadBalancer.stack"></help-field></div>
+      <div class="col-md-2 sm-label-right">
+        Network
+      </div>
+      <div class="col-md-8">
+        <input class="form-control input-sm" readonly value="default"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-2 sm-label-right">
+        Subnet
+      </div>
+      <div class="col-md-8">
+        <input class="form-control input-sm" readonly ng-model="ctrl.loadBalancer.subnet"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-md-2 sm-label-right">Stack <help-field key="aws.loadBalancer.stack"></help-field></div>
       <div class="col-md-3">
         <input type="text"
                class="form-control input-sm"
-               ng-model="loadBalancer.stack"
+               ng-model="$ctrl.loadBalancer.stack"
                name="stackName"
-               ng-change="ctrl.updateName()"
-               ng-pattern="/^[a-zA-Z0-9]*$/"/>
+               ng-change="$ctrl.updateName($ctrl.loadBalancer, $ctrl.application.name)"
+               ng-pattern="/^[a-z0-9]*$/"/>
       </div>
-      <div class="col-md-6 form-inline">
-        <label class="sm-label-right">
-          Detail <help-field key="gce.loadBalancer.detail"></help-field>
-        </label>
+      <div class="col-md-2 sm-label-right">Detail<help-field key="gce.loadBalancer.detail"></help-field></div>
+      <div class="col-md-3">
         <input type="text"
                class="form-control input-sm"
-               ng-model="loadBalancer.detail"
+               ng-model="$ctrl.loadBalancer.detail"
                name="detailName"
-               ng-change="ctrl.updateName()"
-               ng-pattern="/^[a-zA-Z0-9-]*$/"/>
+               ng-change="$ctrl.updateName($ctrl.loadBalancer, $ctrl.application.name)"
+               ng-pattern="/^[a-z0-9-]*$/"/>
       </div>
       <div class="col-md-7 col-md-offset-3" ng-if="form.stackName.$error.pattern">
         <validation-error message="Stack can only contain letters and numbers."></validation-error>

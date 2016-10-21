@@ -5,8 +5,8 @@ let angular = require('angular');
 module.exports = angular.module('spinnaker.deck.gce.loadBalancerTypeToWizard.constant', [])
   .constant('loadBalancerTypeToWizardMap', {
     'Network': {
-      createTemplateUrl: require('../createLoadBalancer.html'),
-      editTemplateUrl: require('../editLoadBalancer.html'),
+      createTemplateUrl: require('../network/createLoadBalancer.html'),
+      editTemplateUrl: require('../network/editLoadBalancer.html'),
       controller: 'gceCreateLoadBalancerCtrl'
     },
     'HTTP(S)': {
