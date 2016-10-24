@@ -11,9 +11,9 @@
         </thead>
         <tbody>
         <tr>
-          <td><select class="form-control input-sm" ng-model="listener.protocol"
+          <td><select class="form-control input-sm" ng-model="ctrl.loadBalancer.ipProtocol"
                       ng-options="protocol for protocol in ['TCP', 'UDP']"></select></td>
-          <td><input class="form-control input-sm" ng-model="listener.portRange"/></td>
+          <td><input class="form-control input-sm" ng-model="ctrl.loadBalancer.portRange"/></td>
         </tr>
         </tbody>
       </table>
