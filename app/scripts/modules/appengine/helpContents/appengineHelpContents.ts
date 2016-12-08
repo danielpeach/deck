@@ -39,6 +39,10 @@ module(APPENGINE_HELP_CONTENTS_REGISTRY, [
       {
         key: 'appengine.loadBalancer.shardBy.ip',
         value: 'Diversion based on applying the modulus operation to a fingerprint of the IP address.'
+      },
+      {
+        key: 'appengine.loadBalancer.migrateTraffic',
+        value: 'TODO'
       }
     ];
 

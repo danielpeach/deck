@@ -1,8 +1,35 @@
-import {chain, get, has, camelCase, filter} from 'lodash';
+import {chain, get, has, camelCase, filter, mapValues, cloneDeep} from 'lodash';
 
 import {InstanceCounts, LoadBalancer, ServerGroup, Instance} from 'core/domain/index';
+import {IAppengineLoadBalancer, IAppengineTrafficSplit} from 'appengine/domain/index';
 
-class AppengineLoadBalancerTransformer {
+export class AppengineLoadBalancerUpsertDescription {
+  public credentials: string;
+  public loadBalancerName: string;
+  public split: IAppengineTrafficSplit;
+  public migrateTraffic: boolean;
+  public region: string;
+
+  public static setAllocationsAsPercents(split: IAppengineTrafficSplit): void {
+    split.allocations = mapValues(split.allocations, (decimal: number) => decimal * 100);
+  }
+
+  public static setAllocationsAsDecimals(split: IAppengineTrafficSplit): void {
+    split.allocations = mapValues(split.allocations, (percent: number) => percent / 100);
+  }
+
+  constructor(loadBalancer: IAppengineLoadBalancer) {
+    this.credentials = loadBalancer.account;
+    this.loadBalancerName = loadBalancer.name;
+    this.split = cloneDeep(loadBalancer.split);
+    AppengineLoadBalancerUpsertDescription.setAllocationsAsDecimals(this.split);
+    this.region = loadBalancer.region;
+    this.migrateTraffic = loadBalancer.migrateTraffic || false;
+  }
+
+}
+
+export class AppengineLoadBalancerTransformer {
   public normalizeLoadBalancer(loadBalancer: LoadBalancer): LoadBalancer {
     loadBalancer.provider = loadBalancer.type;
     loadBalancer.instanceCounts = this.buildInstanceCounts(loadBalancer.serverGroups);
@@ -22,6 +49,15 @@ class AppengineLoadBalancerTransformer {
     let activeServerGroups = filter(loadBalancer.serverGroups, {isDisabled: false});
     loadBalancer.instances = chain(activeServerGroups).map('instances').flatten().value() as Instance[];
     return loadBalancer;
+  }
+
+  public convertLoadBalancerForEditing(loadBalancer: IAppengineLoadBalancer): IAppengineLoadBalancer {
+    AppengineLoadBalancerUpsertDescription.setAllocationsAsPercents(loadBalancer.split);
+    return loadBalancer;
+  }
+
+  public convertLoadBalancerToUpsertDescription(loadBalancer: IAppengineLoadBalancer): AppengineLoadBalancerUpsertDescription {
+    return new AppengineLoadBalancerUpsertDescription(loadBalancer);
   }
 
   private buildInstanceCounts(serverGroups: ServerGroup[]): InstanceCounts {
