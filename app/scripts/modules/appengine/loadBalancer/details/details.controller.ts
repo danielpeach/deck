@@ -14,13 +14,15 @@ class AppengineLoadBalancerDetailsController {
   public state = { loading: true };
   public loadBalancer: LoadBalancer;
 
-  static get $inject() { return ['$uibModal', '$state', '$scope', 'loadBalancer', 'app']; }
+  static get $inject() { return ['$uibModal', '$state', '$scope', 'loadBalancer', 'app', 'loadBalancerWriter', 'confirmationModalService']; }
 
   constructor(private $uibModal: any,
               private $state: any,
               private $scope: any,
               private loadBalancerFromParams: ILoadBalancerFromStateParams,
-              private app: Application) {
+              private app: Application,
+              private loadBalancerWriter: any,
+              private confirmationModalService: any) {
     this.app.getDataSource('loadBalancers')
       .ready()
       .then(() => this.extractLoadBalancer());
@@ -37,6 +39,33 @@ class AppengineLoadBalancerDetailsController {
         isNew: () => false,
         forPipelineConfig: () => false,
       }
+    });
+  }
+
+  public deleteLoadBalancer(): void {
+    let taskMonitor = {
+      application: this.app,
+      title: 'Deleting ' + this.loadBalancer.name,
+      forceRefreshMessage: 'Refreshing application...',
+      forceRefreshEnabled: true
+    };
+
+    let submitMethod = () => {
+      this.loadBalancer.providerType = this.loadBalancer.provider;
+      this.loadBalancer.accountId = this.loadBalancer.account;
+      return this.loadBalancerWriter.deleteLoadBalancer(this.loadBalancer, this.app, {
+        loadBalancerName: this.loadBalancer.name,
+      });
+    };
+
+    this.confirmationModalService.confirm({
+      header: 'Really delete ' + this.loadBalancer.name + '?',
+      buttonText: 'Delete ' + this.loadBalancer.name,
+      provider: 'appengine',
+      account: this.loadBalancer.account,
+      applicationName: this.app.name,
+      taskMonitorConfig: taskMonitor,
+      submitMethod: submitMethod,
     });
   }
 
@@ -66,5 +95,6 @@ class AppengineLoadBalancerDetailsController {
 
 export const APPENGINE_LOAD_BALANCER_DETAILS_CTRL = 'spinnaker.appengine.loadBalancerDetails.controller';
 
-module(APPENGINE_LOAD_BALANCER_DETAILS_CTRL, [])
-  .controller('appengineLoadBalancerDetailsCtrl', AppengineLoadBalancerDetailsController);
+module(APPENGINE_LOAD_BALANCER_DETAILS_CTRL, [
+  require('core/loadBalancer/loadBalancer.write.service.js'),
+]).controller('appengineLoadBalancerDetailsCtrl', AppengineLoadBalancerDetailsController);
