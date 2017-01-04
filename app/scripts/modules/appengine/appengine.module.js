@@ -14,6 +14,8 @@ import {APPENGINE_SERVER_GROUP_DETAILS_CTRL} from './serverGroup/details/details
 import {APPENGINE_SERVER_GROUP_TRANSFORMER} from './serverGroup/transformer';
 import {APPENGINE_SERVER_GROUP_WRITER} from './serverGroup/writer/serverGroup.write.service';
 
+import './logo/appengine.logo.less';
+
 let templates = require.context('./', true, /\.html$/);
 templates.keys().forEach(function(key) {
   templates(key);
@@ -39,6 +41,9 @@ module(APPENGINE_MODULE, [
   .config((cloudProviderRegistryProvider) => {
     cloudProviderRegistryProvider.registerProvider('appengine', {
       name: 'App Engine',
+      logo: {
+        path: require('./logo/appengine.logo.png')
+      },
       cache: {
         configurer: 'appengineCacheConfigurer',
       },
