@@ -6,6 +6,7 @@ import {AccountService, ACCOUNT_SERVICE} from 'core/account/account.service';
 import {IAppengineAccount} from 'appengine/domain/index';
 import {IStage, IPipeline} from 'core/domain/index';
 import {AppengineDeployDescription} from '../transformer';
+import {IGitTrigger} from 'core/domain/trigger';
 
 export interface IAppengineServerGroupCommand {
   application?: string;
@@ -25,6 +26,8 @@ export interface IAppengineServerGroupCommand {
   strategy?: string;
   strategyApplication?: string;
   strategyPipeline?: string;
+  triggerOptions?: string[];
+  triggers?: string[];
 }
 
 interface IViewState {
@@ -67,10 +70,12 @@ export class AppengineServerGroupCommandBuilder {
       });
   }
 
-  public buildNewServerGroupCommandForPipeline(stage: IStage, pipeline: IPipeline): void {
-    // We can't copy server group configuration for App Engine, and can't build the command here because we don't have
-    // access to the application.
-    return null;
+  public buildNewServerGroupCommandForPipeline(stage: IStage, pipeline: IPipeline): {triggerOptions: string[]} {
+    // We can't build a full command here because we don't have access to the application.
+    let triggerOptions = (pipeline.triggers || [])
+      .filter(trigger => trigger.type === 'git')
+      .map((trigger: IGitTrigger) => `${trigger.source}:${trigger.project}:${trigger.slug}`);
+    return {triggerOptions};
   }
 
   public buildServerGroupCommandFromPipeline(app: Application,

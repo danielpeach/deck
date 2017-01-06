@@ -34,13 +34,13 @@ class AppengineCloneServerGroupCtrl {
               private serverGroupWriter: ServerGroupWriterService,
               private commandBuilder: AppengineServerGroupCommandBuilder) {
 
-    if (serverGroupCommand) {
+    if (serverGroupCommand.backingData) {
       $scope.command = serverGroupCommand;
       this.state.loading = false;
     } else {
       commandBuilder.buildNewServerGroupCommand(application, 'appengine', 'createPipeline')
         .then((command) => {
-          $scope.command = command;
+          $scope.command = Object.assign(command, serverGroupCommand);
           this.state.loading = false;
         });
     }

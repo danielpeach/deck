@@ -70,7 +70,7 @@
                ng-model="command.repositoryUrl"/></div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="!command.triggerOptions.length">
       <div class="col-md-3 sm-label-right">
         Branch <help-field key="appengine.serverGroup.branch"></help-field>
       </div>
@@ -80,6 +80,28 @@
                class="form-control input-sm"
                name="branch"
                ng-model="command.branch"/></div>
+    </div>
+
+    <div class="form-group" ng-if="command.triggerOptions.length">
+      <div class="col-md-3 sm-label-right">
+        Branch <help-field key="appengine.serverGroup.branch"></help-field>
+      </div>
+      <div class="col-md-4">
+        <ui-select tagging tagging-label="('new')" multiple ng-model="command.branch" class="form-control input-sm" title="Select a trigger">
+          <ui-select-match placeholder="Select trigger...">{{$select.selected}}</ui-select-match>
+          <ui-select-choices repeat="option in command.triggerOptions | filter: $select.search">
+            <div ng-bind-html="option | highlight: $select.search"></div>
+          </ui-select-choices>
+        </ui-select>
+        <!--<ui-select tagging multiple class="form-control input-sm" ng-model="command.branch">-->
+          <!--<ui-select-match placeholder="Select...">-->
+            <!--{{$select.selected}}-->
+          <!--</ui-select-match>-->
+          <!--<ui-select-choices repeat="option in command.triggerOptions | filter: $select.search">-->
+            <!--<div ng-bind-html="option | highlight: $select.search"></div>-->
+          <!--</ui-select-choices>-->
+        <!--</ui-select>-->
+      </div>
     </div>
 
     <div class="form-group">
@@ -113,15 +135,7 @@
             <div class="text-left"
                  ng-if="!basicSettingsCtrl.createsNewCluster() && command.viewState.mode === 'create' && latestServerGroup">
               <p>
-                There is already a server group in this cluster. Do you want to clone it?
-              </p>
-              <p>
-                Cloning copies the entire configuration from the selected server group, allowing you
-                to modify whichever fields (e.g. image) you need to change in the new server group.
-              </p>
-              <p>
-                To clone a server group, select "Clone" from the "Server Group Actions" menu in the details view of the
-                server group.
+                There is already a server group in this cluster.
               </p>
               <p>
                 <a href ng-click="basicSettingsCtrl.navigateToLatestServerGroup()">

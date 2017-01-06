@@ -21,6 +21,7 @@ export class AppengineDeployDescription {
   strategy?: string;
   strategyApplication?: string;
   strategyPipeline?: string;
+  triggers?: string[];
 
   constructor(command: IAppengineServerGroupCommand) {
     this.credentials = command.credentials;
@@ -38,6 +39,7 @@ export class AppengineDeployDescription {
     this.strategy = command.strategy;
     this.strategyApplication = command.strategyApplication;
     this.strategyPipeline = command.strategyPipeline;
+    this.triggers = command.triggers;
   }
 }
 
