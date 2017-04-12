@@ -1,11 +1,12 @@
 'use strict';
 
 import {CONFIRMATION_MODAL_SERVICE} from 'core/confirmationModal/confirmationModal.service';
+import {ACTION_ICONS} from 'core/widgets/actionIcons/actionIcons.component';
 
 let angular = require('angular');
 
 module.exports = angular.module('spinnaker.gce.instance.details.scalingPolicy.directive', [
-  require('core/widgets/actionIcons/actionIcons.component.js'),
+  ACTION_ICONS,
   CONFIRMATION_MODAL_SERVICE,
   require('angular-ui-bootstrap'),
   require('./../../../autoscalingPolicy/autoscalingPolicy.write.service.js'),

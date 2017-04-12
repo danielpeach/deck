@@ -70,7 +70,7 @@
               class="disabled">
               <a href>Destroy</a>
           </li>
-          <li uib-tooltip="It is not possible to clone an App Engine server group's full 
+          <li uib-tooltip="It is not possible to clone an App Engine server group's full
                            launch configuration. However, clicking this button will allow
                            you to deploy into this server group's cluster.">
             <a href ng-click="ctrl.cloneServerGroup()">Clone</a>
@@ -157,6 +157,11 @@
         <appengine-conditional-dt-dd component="ctrl.serverGroup.scalingPolicy.networkUtilization" key="targetSentPacketsPerSecond"></appengine-conditional-dt-dd>
         <appengine-conditional-dt-dd component="ctrl.serverGroup.scalingPolicy.requestUtilization" key="targetConcurrentRequests"></appengine-conditional-dt-dd>
         <appengine-conditional-dt-dd component="ctrl.serverGroup.scalingPolicy.requestUtilization" key="targetRequestCountPerSecond"></appengine-conditional-dt-dd>
+        <hr ng-if="ctrl.canEditAutoscalingPolicy()">
+        <action-icons ng-if="ctrl.canEditAutoscalingPolicy()"
+                      class="pull-right"
+                      edit-info="Edit Policy"
+                      edit="ctrl.editAutoscalingPolicy()"></action-icons>
       </dl>
     </collapsible-section>
   </div>

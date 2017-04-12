@@ -51,6 +51,14 @@ module(APPENGINE_HELP_CONTENTS_REGISTRY, [HELP_CONTENTS_REGISTRY])
         value: 'If selected, the newly deployed server group will receive all traffic.',
       },
       {
+        key: 'appengine.serverGroup.scalingPolicy.minIdleInstances',
+        value: 'The minimum number of idle instances that App Engine should maintain for this server group.',
+      },
+      {
+        key: 'appengine.serverGroup.scalingPolicy.maxIdleInstances',
+        value: 'The maxiumum number of idle instances that App Engine should maintain for this server group.'
+      },
+      {
         key: 'appengine.serverGroup.stopPreviousVersion',
         value: `If selected, the previously running server group in this server group\'s <b>service</b>
                 (Spinnaker load balancer) will be stopped. This option will be respected only if this server group will

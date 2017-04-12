@@ -1,4 +1,5 @@
 import {module, IScope} from 'angular';
+import {IStateService} from 'angular-ui-router';
 import {IModalService} from 'angular-ui-bootstrap';
 import {cloneDeep, reduce, mapValues, get, map} from 'lodash';
 
@@ -17,10 +18,6 @@ import {RUNNING_TASKS_DETAILS_COMPONENT} from 'core/serverGroup/details/runningT
 import {ITaskMonitorConfig} from 'core/task/monitor/taskMonitor.builder';
 import {AppengineServerGroupCommandBuilder} from '../configure/serverGroupCommandBuilder.service';
 import {AppengineHealth} from 'appengine/common/appengineHealth';
-
-interface IPrivateScope extends IScope {
-  $$destroyed: boolean;
-}
 
 interface IServerGroupFromStateParams {
   accountId: string;
@@ -61,8 +58,8 @@ class AppengineServerGroupDetailsController {
       </table>`;
   }
 
-  constructor(private $state: any,
-              private $scope: IPrivateScope,
+  constructor(private $state: IStateService,
+              private $scope: IScope,
               private $uibModal: IModalService,
               serverGroup: IServerGroupFromStateParams,
               private app: Application,
@@ -338,6 +335,26 @@ class AppengineServerGroupDetailsController {
     }
   }
 
+  public canEditAutoscalingPolicy(): boolean {
+    return this.serverGroup.scalingPolicy &&
+      this.serverGroup.scalingPolicy.type === 'AUTOMATIC' &&
+      this.serverGroup.env !== 'FLEXIBLE' &&
+      this.serverGroup.loadBalancers[0] === 'default';
+  }
+
+  public editAutoscalingPolicy(): void {
+    this.$uibModal.open({
+      templateUrl: require('./editAutoscalingPolicy.html'),
+      controller: 'appengineEditAutoscalingPolicyModalCtrl',
+      controllerAs: 'ctrl',
+      size: 'md',
+      resolve: {
+        application: () => this.app,
+        serverGroup: () => this.serverGroup,
+      }
+    });
+  }
+
   private canStartOrStopServerGroup(): boolean {
     const isFlex = this.serverGroup.env === 'FLEXIBLE';
     const usesManualScaling = get(this.serverGroup, 'scalingPolicy.type') === 'MANUAL';
@@ -445,7 +462,6 @@ class AppengineServerGroupDetailsController {
 }
 
 export const APPENGINE_SERVER_GROUP_DETAILS_CTRL = 'spinnaker.appengine.serverGroup.details.controller';
-
 module(APPENGINE_SERVER_GROUP_DETAILS_CTRL, [
     APPENGINE_SERVER_GROUP_WRITER,
     CONFIRMATION_MODAL_SERVICE,

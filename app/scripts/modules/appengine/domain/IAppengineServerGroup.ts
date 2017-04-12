@@ -10,4 +10,8 @@ export interface IAppengineServerGroup extends ServerGroup {
 
 export interface IAppengineScalingPolicy {
   type: 'AUTOMATIC' | 'MANUAL' | 'BASIC';
+
+  // For 'AUTOMATIC'
+  minIdleInstances: number;
+  maxIdleInstances: number;
 }

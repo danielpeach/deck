@@ -1,10 +1,12 @@
 import {module} from 'angular';
 
 import {APPENGINE_APPLICATION_NAME_VALIDATOR} from './validation/applicationName.validator';
+import {APPENGINE_AUTOSCALING_POLICY_WRITER} from './autoscalingPolicy/appengineAutoscalingPolicy.write.service';
 import {APPENGINE_CACHE_CONFIGURER} from './cache/cacheConfigurer.service';
 import {APPENGINE_CLONE_SERVER_GROUP_CTRL} from './serverGroup/configure/wizard/cloneServerGroup.controller';
 import {APPENGINE_COMPONENT_URL_DETAILS} from './common/componentUrlDetails.component';
 import {APPENGINE_CONDITIONAL_DESCRIPTION_LIST_ITEM} from './common/conditionalDescriptionListItem.component';
+import {APPENGINE_EDIT_AUTOSCALING_POLICY_MODAL_CTRL} from './serverGroup/details/editAutoscalingPolicy.modal.controller';
 import {APPENGINE_HELP_CONTENTS_REGISTRY} from './helpContents/appengineHelpContents';
 import {APPENGINE_INSTANCE_DETAILS_CTRL} from './instance/details/details.controller';
 import {APPENGINE_LOAD_BALANCER_CREATE_MESSAGE} from './common/loadBalancerMessage.component';
@@ -28,10 +30,12 @@ export const APPENGINE_MODULE = 'spinnaker.appengine';
 
 module(APPENGINE_MODULE, [
     APPENGINE_APPLICATION_NAME_VALIDATOR,
+    APPENGINE_AUTOSCALING_POLICY_WRITER,
     APPENGINE_CACHE_CONFIGURER,
     APPENGINE_CLONE_SERVER_GROUP_CTRL,
     APPENGINE_COMPONENT_URL_DETAILS,
     APPENGINE_CONDITIONAL_DESCRIPTION_LIST_ITEM,
+    APPENGINE_EDIT_AUTOSCALING_POLICY_MODAL_CTRL,
     APPENGINE_HELP_CONTENTS_REGISTRY,
     APPENGINE_INSTANCE_DETAILS_CTRL,
     APPENGINE_LOAD_BALANCER_CREATE_MESSAGE,
