@@ -7,8 +7,9 @@ import {
   PIPELINE_TEMPLATE_SERVICE, IPipelineTemplate,
   IVariableMetadata, pipelineTemplateService, IPipelineConfig
 } from './pipelineTemplate.service';
-import {IVariable} from './variableInput.service';
+import {IVariable} from './inputs/variableInput.service';
 import {Application} from 'core/application/application.model';
+import {variableValidatorService} from './validators/variableValidator.service';
 
 export interface IVariableMetadataGroup {
   name: string;
@@ -42,6 +43,10 @@ export class ConfigurePipelineTemplateModalController implements IComponentContr
 
   public cancel(): void {
     this.$uibModalInstance.close();
+  }
+
+  public formIsValid(): boolean {
+    return this.variables.every(v => v.errors.length === 0);
   }
 
   public getPipelineConfigPlan(): void {
@@ -80,6 +85,7 @@ export class ConfigurePipelineTemplateModalController implements IComponentContr
 
   public handleVariableChange(newVariable: IVariable): void {
     const oldVariable = this.getVariable(newVariable.name);
+    newVariable.errors = variableValidatorService.validate(newVariable);
     this.variables = without(this.variables, oldVariable).concat([newVariable]);
 
     // `handleVariableChange` is passed to a React component, and Angular has no idea when it has been called.
@@ -116,12 +122,16 @@ export class ConfigurePipelineTemplateModalController implements IComponentContr
         const defaultValue = (v.type === 'list' && !v.defaultValue) ? [''] : v.defaultValue;
         return {
           name: v.name,
-          type: v.type,
+          type: v.type || 'string',
           errors: [],
           value: defaultValue,
+          hideErrors: true,
         };
       });
     }
+    this.variables.forEach(v => {
+      v.errors = variableValidatorService.validate(v);
+    });
   }
 }
 

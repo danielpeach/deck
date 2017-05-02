@@ -114,6 +114,7 @@ window.spinnakerSettings = {
     roscoMode: false,
     netflixMode: netflixMode,
     chaosMonkey: chaosEnabled,
+    pipelineTemplates: true,
     // whether stages affecting infrastructure (like "Create Load Balancer") should be enabled or not
     infrastructureStages: process.env.INFRA_STAGES === 'enabled',
     jobs: false,

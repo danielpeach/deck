@@ -13,8 +13,8 @@
       "name": "targetCredentials",
       "group": "Basic Settings",
       "description": "The account credentials where the application will be deployed to",
-      "type": "string",
-      "defaultValue": "mgmt",
+      "type": "list",
+      "defaultValue": ["mgmt"],
       "example": null
     },
     {
