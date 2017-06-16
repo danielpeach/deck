@@ -3,7 +3,7 @@ import {module, IScope} from 'angular';
 import * as moment from 'moment';
 
 import {SETTINGS} from 'core/config/settings';
-import {IGOR_SERVICE, IgorService, BuildServiceType} from 'core/ci/igor.service';
+import {IGOR_SERVICE, IgorService} from 'core/ci/igor.service';
 import {IJobConfig, ParameterDefinitionList, IStage} from 'core/domain';
 import {TravisExecutionLabel} from './TravisExecutionLabel';
 
@@ -72,7 +72,7 @@ export class TravisStage {
   };
 
   private initializeMasters(): void {
-    this.igorService.listMasters(BuildServiceType.Travis).then((masters: string[]) => {
+    this.igorService.listMasters('travis').then((masters: string[]) => {
       this.masters = masters;
       this.viewState.mastersLoaded = true;
       this.viewState.mastersRefreshing = false;

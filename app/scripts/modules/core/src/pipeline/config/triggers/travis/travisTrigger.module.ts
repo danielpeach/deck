@@ -1,6 +1,6 @@
 import {module, IScope, IQService} from 'angular';
 
-import {IGOR_SERVICE, IgorService, BuildServiceType} from 'core/ci/igor.service';
+import {IGOR_SERVICE, IgorService} from 'core/ci/igor.service';
 import {PIPELINE_CONFIG_PROVIDER} from 'core/pipeline/config/pipelineConfigProvider';
 import {SERVICE_ACCOUNT_SERVICE, ServiceAccountService} from 'core/serviceAccount/serviceAccount.service';
 import {IBuildTrigger} from 'core/domain/ITrigger';
@@ -57,7 +57,7 @@ export class TravisTrigger {
   }
 
   private initializeMasters(): void {
-    this.igorService.listMasters(BuildServiceType.Travis).then((masters: string[]) => {
+    this.igorService.listMasters('travis').then((masters: string[]) => {
       this.masters = masters;
       this.viewState.mastersLoaded = true;
       this.viewState.mastersRefreshing = false;

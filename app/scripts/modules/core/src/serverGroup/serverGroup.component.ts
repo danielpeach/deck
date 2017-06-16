@@ -86,7 +86,7 @@ export class ServerGroupController implements IComponentController {
 
     const viewModel: ServerGroupViewModel = {
       serverGroup: serverGroup,
-      serverGroupSequence: (<Function>this.$filter('serverGroupSequence'))(serverGroup.name),
+      serverGroupSequence: serverGroup.serverGroupSequence || (<Function>this.$filter('serverGroupSequence'))(serverGroup.name),
       jenkins: null,
       hasBuildInfo: !!serverGroup.buildInfo,
       instances: filteredInstances,
