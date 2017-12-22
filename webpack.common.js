@@ -170,7 +170,7 @@ function configure(IS_TEST) {
         'angular-cache', 'angular-messages', 'angular-sanitize', 'bootstrap',
         'clipboard', 'd3', 'jquery-ui', 'moment-timezone', 'rxjs', 'react', 'angular2react',
         'react2angular', 'react-bootstrap', 'react-dom', 'react-ga', 'ui-select',
-        '@uirouter/angularjs', '@uirouter/visualizer',
+        '@uirouter/angularjs', '@uirouter/visualizer', '@spinnaker/kayenta'
       ]
     };
 
