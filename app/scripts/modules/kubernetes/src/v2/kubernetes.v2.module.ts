@@ -70,7 +70,9 @@ module(KUBERNETES_V2_MODULE, [
   KUBERNETES_MANIFEST_CONDITION,
   KUBERNETES_MANIFEST_SERVICE,
   KUBERNETES_MANIFEST_ARTIFACT,
+  require('../loadBalancer/transformer.js').name,
   require('../securityGroup/reader.js').name,
+  require('../securityGroup/transformer.js').name,
   KUBERNETES_DEPLOY_MANIFEST_STAGE,
   KUBERNETES_DELETE_MANIFEST_STAGE,
   KUBERNETES_SCALE_MANIFEST_STAGE,
@@ -106,6 +108,7 @@ module(KUBERNETES_V2_MODULE, [
         createLoadBalancerTemplateUrl: require('./manifest/wizard/manifestWizard.html'),
         detailsController: 'kubernetesV2LoadBalancerDetailsCtrl',
         detailsTemplateUrl: require('./loadBalancer/details/details.html'),
+        transformer: 'kubernetesLoadBalancerTransformer',
       },
       securityGroup: {
         reader: 'kubernetesSecurityGroupReader',
@@ -113,6 +116,7 @@ module(KUBERNETES_V2_MODULE, [
         createSecurityGroupTemplateUrl: require('./manifest/wizard/manifestWizard.html'),
         detailsController: 'kubernetesV2SecurityGroupDetailsCtrl',
         detailsTemplateUrl: require('./securityGroup/details/details.html'),
+        transformer: 'kubernetesSecurityGroupTransformer',
       },
       instance: {
         detailsController: 'kubernetesV2InstanceDetailsCtrl',
