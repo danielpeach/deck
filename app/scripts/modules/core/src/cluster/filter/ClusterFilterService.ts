@@ -66,21 +66,21 @@ export class ClusterFilterService {
       }
     }
 
-    const groups: IClusterGroup[] = [];
+    let groups: IClusterGroup[] = [];
     const serverGroups: IServerGroup[] = this.filterServerGroupsForDisplay(
       application.getDataSource('serverGroups').data,
     );
 
-    const accountGroupings = groupBy(serverGroups, 'account');
+    const clusterGroupings = groupBy(serverGroups, 'cluster');
 
-    forOwn(accountGroupings, (accountGroup: IServerGroup[], account: string) => {
-      const categoryGroupings = groupBy(accountGroup, 'category'),
-        clusterGroups: IClusterSubgroup[] = [];
+    forOwn(clusterGroupings, (accountGroup: IServerGroup[], cluster: string) => {
+      const categoryGroupings = groupBy(accountGroup, 'category');
+      let clusterGroups: IClusterSubgroup[] = [];
 
       forOwn(categoryGroupings, (categoryGroup: IServerGroup[], category: string) => {
-        const clusterGroupings = groupBy(categoryGroup, 'cluster');
+        const accountGroupings = groupBy(categoryGroup, 'account');
 
-        forOwn(clusterGroupings, (clusterGroup: IServerGroup[], cluster: string) => {
+        forOwn(accountGroupings, (clusterGroup: IServerGroup[], account: string) => {
           const regionGroupings = groupBy(clusterGroup, 'region'),
             regionGroups: IServerGroupSubgroup[] = [];
 
@@ -128,9 +128,20 @@ export class ClusterFilterService {
         });
       });
 
+      clusterGroups = clusterGroups.reduce((a, b) => {
+        debugger;
+        let group;
+        if ((group = a.find(g => g.heading === b.heading))) {
+          group.subgroups = group.subgroups.concat(b.subgroups);
+        } else {
+          a.push(b);
+        }
+        return a;
+      }, []);
+
       groups.push({
-        heading: account,
-        key: account,
+        heading: cluster,
+        key: cluster,
         subgroups: sortBy(clusterGroups, ['heading', 'category']),
       });
     });

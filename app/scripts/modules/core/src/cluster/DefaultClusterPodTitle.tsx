@@ -11,10 +11,6 @@ export class DefaultClusterPodTitle extends React.Component<IClusterPodTitleProp
 
     return (
       <div className="rollup-title-cell">
-        <div className="heading-tag">
-          <AccountTag account={parentHeading} />
-        </div>
-
         <div className="pod-center horizontal space-between center flex-1">
           <div>
             <span className="glyphicon glyphicon-th" />
