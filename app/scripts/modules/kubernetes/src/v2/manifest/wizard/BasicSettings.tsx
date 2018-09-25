@@ -18,7 +18,7 @@ class ManifestBasicSettingsImpl extends React.Component<IManifestBasicSettingsPr
 
   private accountUpdated = (account: string): void => {
     const { formik } = this.props;
-    formik.formik.command.account = account;
+    formik.command.account = account;
     formik.setFieldValue('account', account);
   };
 

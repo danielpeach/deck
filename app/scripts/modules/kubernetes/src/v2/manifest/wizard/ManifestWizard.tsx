@@ -19,6 +19,7 @@ import { ManifestBasicSettings } from 'kubernetes/v2/manifest/wizard/BasicSettin
 import { ManifestEntry } from 'kubernetes/v2/manifest/wizard/ManifestEntry';
 import { JobManifestPodLogs } from 'kubernetes/v2/pipelines/stages/deployManifest/react/JobManifestPodLogs';
 import { ManifestLoadBalancers } from 'kubernetes/v2/manifest/wizard/LoadBalancers';
+import { Subject } from 'rxjs/Subject';
 
 export interface IKubernetesManifestModalProps extends IModalComponentProps {
   title: string;
@@ -34,6 +35,8 @@ export interface IKubernetesManifestModalState {
 }
 
 export class ManifestWizard extends React.Component<IKubernetesManifestModalProps, IKubernetesManifestModalState> {
+  private manifestChangeStream = new Subject<void>();
+
   public static defaultProps: Partial<IKubernetesManifestModalProps> = {
     closeModal: noop,
     dismissModal: noop,
@@ -50,6 +53,7 @@ export class ManifestWizard extends React.Component<IKubernetesManifestModalProp
       KubernetesManifestCommandBuilder.buildNewManifestCommand(props.application).then(command => {
         Object.assign(this.state.command, command);
         this.setState({ loaded: true });
+        this.manifestChangeStream.next(command.command.manifests);
       });
     }
 
@@ -91,8 +95,8 @@ export class ManifestWizard extends React.Component<IKubernetesManifestModalProp
         validate={this.validate}
       >
         <ManifestBasicSettings done={true} app={application} />
-        {/*<ManifestLoadBalancers done={true} app={application} />*/}
-        <ManifestEntry done={true} app={application} />
+        <ManifestLoadBalancers manifestChangeStream={this.manifestChangeStream} done={true} app={application} />
+        <ManifestEntry manifestChangeStream={this.manifestChangeStream} done={true} app={application} />
       </WizardModal>
     );
   }
