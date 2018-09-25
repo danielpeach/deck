@@ -17,6 +17,8 @@ import {
 } from 'kubernetes/v2/manifest/manifestCommandBuilder.service';
 import { ManifestBasicSettings } from 'kubernetes/v2/manifest/wizard/BasicSettings';
 import { ManifestEntry } from 'kubernetes/v2/manifest/wizard/ManifestEntry';
+import { JobManifestPodLogs } from 'kubernetes/v2/pipelines/stages/deployManifest/react/JobManifestPodLogs';
+import { ManifestLoadBalancers } from 'kubernetes/v2/manifest/wizard/LoadBalancers';
 
 export interface IKubernetesManifestModalProps extends IModalComponentProps {
   title: string;
@@ -89,6 +91,7 @@ export class ManifestWizard extends React.Component<IKubernetesManifestModalProp
         validate={this.validate}
       >
         <ManifestBasicSettings done={true} app={application} />
+        {/*<ManifestLoadBalancers done={true} app={application} />*/}
         <ManifestEntry done={true} app={application} />
       </WizardModal>
     );
